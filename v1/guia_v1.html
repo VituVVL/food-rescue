@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia Food Rescue v1</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface-2: #f0eee8;
+    --ink: #1d1f1c;
+    --ink-2: #4a4e47;
+    --ink-3: #7a7f76;
+    --line: #dedbd2;
+    --accent: #2f7d4f;
+    --accent-soft: #e2f0e6;
+    --warn: #b5562b;
+    --warn-soft: #f7e6dc;
+    --donor: #c07a12;
+    --recip: #2f7d4f;
+    --resc: #2b6cb0;
+    --store: #6b5bb5;
+    --code-bg: #efece4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151714;
+      --surface: #1d201c;
+      --surface-2: #252923;
+      --ink: #e9ebe5;
+      --ink-2: #b9bdb3;
+      --ink-3: #8a8f85;
+      --line: #343930;
+      --accent: #6cc38f;
+      --accent-soft: #1f3327;
+      --warn: #e58f63;
+      --warn-soft: #3a2519;
+      --donor: #e5a64a;
+      --recip: #6cc38f;
+      --resc: #6ea8e6;
+      --store: #a497e6;
+      --code-bg: #262a24;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151714;
+    --surface: #1d201c;
+    --surface-2: #252923;
+    --ink: #e9ebe5;
+    --ink-2: #b9bdb3;
+    --ink-3: #8a8f85;
+    --line: #343930;
+    --accent: #6cc38f;
+    --accent-soft: #1f3327;
+    --warn: #e58f63;
+    --warn-soft: #3a2519;
+    --donor: #e5a64a;
+    --recip: #6cc38f;
+    --resc: #6ea8e6;
+    --store: #a497e6;
+    --code-bg: #262a24;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  @media (min-width: 900px) {
+    .wrap { grid-template-columns: 200px 1fr; padding: 0 32px 96px; }
+    nav.toc { position: sticky; top: 24px; align-self: start; }
+  }
+
+  header.hero {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 16px 32px;
+  }
+  @media (min-width: 900px) { header.hero { padding: 72px 32px 40px; } }
+  .eyebrow {
+    font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin: 0 0 8px;
+  }
+  h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.15; margin: 0 0 16px; letter-spacing: -.01em; }
+  .lede { font-size: 19px; color: var(--ink-2); max-width: 680px; margin: 0; }
+  .lede strong { color: var(--ink); }
+
+  nav.toc { font-size: 14px; }
+  nav.toc p { margin: 0 0 8px; color: var(--ink-3); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  @media (min-width: 900px) { nav.toc ol { display: block; } nav.toc li { margin: 0 0 6px; } }
+  nav.toc a { color: var(--ink-2); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); }
+
+  main { min-width: 0; }
+  section { margin: 0 0 56px; scroll-margin-top: 24px; }
+  h2 { font-size: 24px; margin: 0 0 6px; letter-spacing: -.005em; }
+  .sub { color: var(--ink-3); margin: 0 0 20px; }
+  h3 { font-size: 17px; margin: 0 0 6px; }
+  h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 0 0 6px; font-weight: 600; }
+  p { margin: 0 0 14px; }
+  code {
+    font: 0.88em/1.4 ui-monospace, "Cascadia Code", Consolas, monospace;
+    background: var(--code-bg); padding: 1px 6px; border-radius: 4px;
+  }
+
+  .callout {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 0 0 16px;
+  }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout p:last-child { margin: 0; }
+
+  .c-donor { --c: var(--donor); }
+  .c-recip { --c: var(--recip); }
+  .c-resc { --c: var(--resc); }
+  .c-store { --c: var(--store); }
+
+  /* processo gaia */
+  .process { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 0 0 14px; }
+  .stage {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; font-size: 14px; color: var(--ink-3);
+  }
+  .stage b { display: block; color: var(--ink-2); font-size: 15px; }
+  .stage.done b { color: var(--ink); }
+  .stage.now { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--ink-2); }
+  .stage.now b { color: var(--accent); }
+  .stage .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+
+  /* sub-organizações e ambiente */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; border-top: 4px solid var(--c, var(--line));
+  }
+  .tile h3 { color: var(--c, var(--ink)); margin-bottom: 2px; }
+  .tile p { font-size: 14px; color: var(--ink-2); margin: 0; }
+  .tile .k { font: 13px ui-monospace, Consolas, monospace; color: var(--ink-3); margin: 0 0 4px; }
+
+  /* papéis */
+  .role {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    border-left: 5px solid var(--c); padding: 18px 20px; margin: 0 0 16px;
+  }
+  .role > h3 { color: var(--c); font-size: 20px; margin: 0 0 4px; }
+  .role .desc { color: var(--ink-2); margin: 0 0 16px; }
+  .role-grid { display: grid; grid-template-columns: 1fr; gap: 16px 24px; }
+  @media (min-width: 760px) { .role-grid { grid-template-columns: 1fr 1fr; } }
+  .role-grid > div { min-width: 0; }
+  .role ul { margin: 0; padding-left: 18px; font-size: 15px; color: var(--ink-2); }
+  .role li { margin: 0 0 4px; }
+  .role .perm { font-size: 15px; color: var(--ink-2); margin: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+  .chip {
+    font: 13px/1.3 ui-monospace, "Cascadia Code", Consolas, monospace;
+    padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--ink);
+  }
+  .chip.act { background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* diagrama */
+  .figure {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; margin: 0 0 12px; overflow-x: auto;
+  }
+  .figure svg { display: block; width: 100%; min-width: 640px; height: auto; }
+  .caption { font-size: 14px; color: var(--ink-3); margin: 0 0 16px; }
+  svg .lane-head { font: 600 14px system-ui, sans-serif; text-anchor: middle; }
+  svg .lane { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  svg .msg { stroke: var(--ink-2); stroke-width: 1.6; fill: none; }
+  svg .msg.reply { stroke-dasharray: 6 4; }
+  svg .lbl { font: 13px system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
+  svg .note { font: italic 13px system-ui, sans-serif; fill: var(--ink-3); }
+  svg .band { fill: var(--surface-2); }
+  svg .band-lbl { font: 600 12px system-ui, sans-serif; fill: var(--ink-3); letter-spacing: .02em; }
+  svg .head { fill: var(--ink-2); }
+
+  /* tabelas */
+  .table-wrap { overflow-x: auto; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th { font-size: 13px; color: var(--ink-3); font-weight: 600; background: var(--surface-2); }
+  td:first-child { white-space: nowrap; }
+  /* protocolos */
+  .protos { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .proto { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; }
+  .proto-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 4px; }
+  .proto-head h3 { font: 600 16px ui-monospace, "Cascadia Code", Consolas, monospace; margin: 0; }
+  .proto .who { font-size: 14px; color: var(--accent); font-weight: 600; }
+  .proto .purpose { color: var(--ink-2); margin: 0 0 10px; }
+  .proto dl { display: grid; grid-template-columns: 1fr; gap: 2px 16px; margin: 0; font-size: 15px; }
+  @media (min-width: 640px) { .proto dl { grid-template-columns: 130px 1fr; gap: 6px 16px; } }
+  .proto dt { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600; padding-top: 2px; }
+  .proto dd { margin: 0 0 6px; color: var(--ink-2); }
+  @media (min-width: 640px) { .proto dd { margin: 0; } }
+
+  /* matriz */
+  table.matrix { min-width: 560px; }
+  table.matrix th:not(:first-child), table.matrix td:not(:first-child) { text-align: center; }
+  table.matrix th.r { color: var(--c); font-size: 14px; }
+  .mk { display: inline-grid; place-items: center; min-width: 28px; height: 24px; padding: 0 6px; border-radius: 6px; font-size: 13px; font-weight: 700; }
+  .mk.i { background: var(--accent); color: var(--surface); }
+  .mk.r { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+  .mk.b { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line); }
+  .mk.q { background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--ink-2); margin: 0 0 16px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* pontos em aberto */
+  ol.issues { margin: 0; padding: 0; list-style: none; counter-reset: q; }
+  ol.issues > li {
+    counter-increment: q; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px 14px 52px; margin: 0 0 10px; position: relative;
+  }
+  ol.issues > li::before {
+    content: counter(q); position: absolute; left: 14px; top: 13px;
+    width: 26px; height: 26px; border-radius: 50%; background: var(--warn-soft); color: var(--warn);
+    font-weight: 700; font-size: 13px; display: grid; place-items: center;
+  }
+  ol.issues h3 { font-size: 16px; }
+  ol.issues p { font-size: 15px; color: var(--ink-2); margin: 0; }
+
+  .two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 700px) { .two { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .card p { font-size: 15px; color: var(--ink-2); }
+  .card p:last-child { margin: 0; }
+
+  footer { color: var(--ink-3); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">Food Rescue · v1 · análise Gaia</p>
+  <h1>O modelo v1, simples desde o início</h1>
+  <p class="lede">Uma rede de <strong>restaurantes, voluntários, geladeiras comunitárias e receptores</strong> que leva a comida que sobra a quem precisa, sem central de despacho. Esta página resume a análise Gaia do documento <code>Food Rescue - Gaia.docx</code>.</p>
+</header>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Índice">
+    <p>Nesta página</p>
+    <ol>
+      <li><a href="#ideia">A ideia do v1</a></li>
+      <li><a href="#gaia">Onde estamos</a></li>
+      <li><a href="#organizacao">Sub-organizações</a></li>
+      <li><a href="#ambiente">Modelo de ambiente</a></li>
+      <li><a href="#papeis">Modelo de papéis</a></li>
+      <li><a href="#interacoes">Modelo de interações</a></li>
+      <li><a href="#matriz">Quem participa de quê</a></li>
+      <li><a href="#sequencia">A vida de um lote</a></li>
+      <li><a href="#aberto">Pontos em aberto</a></li>
+      <li><a href="#proximos">Próximos passos</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="ideia">
+      <h2>A ideia do v1</h2>
+      <p class="sub">O v0 foi gerado por inteiro pelo Claude e fica só como referência. O v1 é feito pelo grupo, do zero.</p>
+      <div class="callout">
+        <p><strong>Começar simples.</strong> O professor recomendou partir de um modelo pequeno: as coisas tendem a complicar com o tempo, e um modelo que já começa complexo fica inviável. Por isso o v1 tem um único tipo de doador, o <strong>restaurante</strong>.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>v0 (referência)</th><th>v1 (este modelo)</th></tr></thead>
+          <tbody>
+            <tr><td>Origem</td><td>Gerado pelo Claude, com código pronto</td><td>Feito pelo grupo, a partir da análise Gaia</td></tr>
+            <tr><td>Doadores</td><td>Padarias e supermercados</td><td>Só restaurantes</td></tr>
+            <tr><td>Nomes dos papéis</td><td>Doador, Recetor, Voluntário, Frigorífico</td><td>Doador, Receptor, Resgatador, Armazenador</td></tr>
+            <tr><td>Ponto de partida</td><td>Implementação SPADE</td><td>Documentação Gaia; o código vem depois</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="gaia">
+      <h2>Onde estamos no processo Gaia</h2>
+      <p class="sub">O documento cobre a fase de análise: sub-organizações, ambiente, papéis e interações, todos em versão preliminar.</p>
+      <div class="process">
+        <div class="stage done"><span class="tag">feito</span><b>0 · Requisitos</b>objetivos e atores</div>
+        <div class="stage now"><span class="tag">agora</span><b>1 · Análise</b>ambiente, papéis, interações e regras</div>
+        <div class="stage"><span class="tag">depois</span><b>2 · Design arquitetural</b>estrutura organizacional e protocolos completos</div>
+        <div class="stage"><span class="tag">depois</span><b>3 · Design detalhado</b>agentes e serviços</div>
+        <div class="stage"><span class="tag">depois</span><b>4 · Implementação</b>SPADE</div>
+      </div>
+      <p class="caption">Entrega: 19–20 de novembro de 2026, com código, documentação, relatório de desempenho e demo.</p>
+    </section>
+
+    <section id="organizacao">
+      <h2>Sub-organizações</h2>
+      <p class="sub">A rede divide-se em quatro grupos. Cada um corresponde a um papel.</p>
+      <div class="tiles">
+        <div class="tile c-donor"><h3>Doadores</h3><p>Restaurantes. Papel: Doador.</p></div>
+        <div class="tile c-resc"><h3>Transporte</h3><p>Voluntários com veículo. Papel: Resgatador.</p></div>
+        <div class="tile c-store"><h3>Armazenamento</h3><p>Geladeiras e despensas comunitárias. Papel: Armazenador.</p></div>
+        <div class="tile c-recip"><h3>Distribuição</h3><p>ONGs, abrigos e famílias. Papel: Receptor.</p></div>
+      </div>
+    </section>
+
+    <section id="ambiente">
+      <h2>Modelo de ambiente</h2>
+      <p class="sub">O que existe no mundo e que os agentes leem ou alteram. Os campos ainda são preliminares.</p>
+      <div class="tiles">
+        <div class="tile"><p class="k">Lote</p><h3>A comida em si</h3><p>id, categoria, kg, etc. É o que circula pela rede.</p></div>
+        <div class="tile"><p class="k">Mapa</p><h3>A cidade</h3><p>Nós, arestas, … Base para distâncias e rotas.</p></div>
+        <div class="tile"><p class="k">Relógio</p><h3>O tempo</h3><p>Validade, janelas de disponibilidade e tempo fora do frio.</p></div>
+        <div class="tile"><p class="k">Necessidade</p><h3>O que cada receptor quer</h3><p>Declarada pelo receptor e lida pelos doadores.</p></div>
+      </div>
+    </section>
+
+    <section id="papeis">
+      <h2>Modelo de papéis preliminar</h2>
+      <p class="sub">Cada papel tem protocolos (com quem fala), atividades (o que faz sozinho, <u>sublinhadas</u> como na notação Gaia), permissões e regras de segurança.</p>
+
+      <article class="role c-donor">
+        <h3>Doador</h3>
+        <p class="desc">Restaurante que gera excedente e o oferece à rede.</p>
+        <div class="role-grid">
+          <div>
+            <h4>Protocolos</h4>
+            <div class="chips"><span class="chip">AnunciarOferta</span><span class="chip">ContratarResgate</span><span class="chip">ConfirmarColeta</span><span class="chip">UsarArmazenamento</span><span class="chip">TratarImprevisto</span></div>
+            <h4>Atividades</h4>
+            <div class="chips"><span class="chip act">AvaliarExcedente</span><span class="chip act">LotearEEmbalar</span><span class="chip act">DefinirPrazoMáximo</span></div>
+            <h4>Permissões</h4>
+            <p class="perm">Gera lotes; altera o estado do lote até a coleta; lê mapa, relógio e a reputação de resgatadores e receptores.</p>
+          </div>
+          <div>
+            <h4>Segurança</h4>
+            <ul>
+              <li>Só anuncia lote com validade restante maior que o tempo mínimo útil.</li>
+              <li>Informa corretamente se o lote exige frio e quantos kg tem.</li>
+              <li>Mantém no máximo um contrato de transporte ativo por lote.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="role c-resc">
+        <h3>Resgatador</h3>
+        <p class="desc">Voluntário com veículo, capacidade em kg, caixa térmica (sim ou não) e janela de disponibilidade. Transporta lotes entre origem e destino.</p>
+        <div class="role-grid">
+          <div>
+            <h4>Protocolos</h4>
+            <div class="chips"><span class="chip">ContratarResgate (propõe)</span><span class="chip">ConfirmarColeta</span><span class="chip">EntregarLote</span><span class="chip">UsarArmazenamento</span><span class="chip">TratarImprevisto</span></div>
+            <h4>Atividades</h4>
+            <div class="chips"><span class="chip act">EstimarUtilidade</span><span class="chip act">CalcularRota</span><span class="chip act">MonitorarTemperatura</span><span class="chip act">AtualizarDisponibilidade</span></div>
+            <h4>Permissões</h4>
+            <p class="perm">Gera e altera o próprio estado (posição, carga, disponibilidade); altera estado e local do lote durante o transporte; lê ofertas, necessidades, mapa e reputação.</p>
+          </div>
+          <div>
+            <h4>Segurança</h4>
+            <ul>
+              <li>Nunca aceita mais que a capacidade.</li>
+              <li>Nunca aceita lote refrigerado sem caixa térmica.</li>
+              <li>Não deixa o lote passar do limite L fora do frio.</li>
+              <li>Reporta a temperatura e o peso com honestidade.</li>
+              <li>Avisa o cancelamento assim que o decide.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="role c-store">
+        <h3>Armazenador</h3>
+        <p class="desc">Geladeira ou despensa comunitária com capacidade em kg, faixa de temperatura e horário de acesso. Guarda lotes até alguém retirá-los.</p>
+        <div class="role-grid">
+          <div>
+            <h4>Protocolos</h4>
+            <div class="chips"><span class="chip">AnunciarOferta (responde como destino)</span><span class="chip">UsarArmazenamento</span><span class="chip">TratarImprevisto</span></div>
+            <h4>Atividades</h4>
+            <div class="chips"><span class="chip act">MonitorarTemperatura</span><span class="chip act">GerirInventário</span><span class="chip act">DescartarVencidos</span></div>
+            <h4>Permissões</h4>
+            <p class="perm">Gera e altera vagas, temperatura e inventário; altera o estado de lotes depositados (armazenado, descartado); lê o tempo e os lotes que chegam.</p>
+          </div>
+          <div>
+            <h4>Segurança</h4>
+            <ul>
+              <li>Nunca aceita lote acima da capacidade ou de categoria incompatível.</li>
+              <li>Avisa de imediato uma falha de refrigeração.</li>
+              <li>Nunca libera lote vencido ou acima do limite fora do frio.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="role c-recip">
+        <h3>Receptor</h3>
+        <p class="desc">ONG, abrigo ou família que declara a sua necessidade e recebe entregas.</p>
+        <div class="role-grid">
+          <div>
+            <h4>Protocolos</h4>
+            <div class="chips"><span class="chip">AnunciarNecessidade</span><span class="chip">AnunciarOferta (responde)</span><span class="chip">EntregarLote</span><span class="chip">TratarImprevisto</span></div>
+            <h4>Atividades</h4>
+            <div class="chips"><span class="chip act">AvaliarNecessidade</span><span class="chip act">InspecionarLote</span></div>
+            <h4>Permissões</h4>
+            <p class="perm">Gera e altera as suas necessidades; altera o estado do lote ao receber ou recusar; lê lotes a caminho e a reputação de doadores e resgatadores.</p>
+          </div>
+          <div>
+            <h4>Segurança</h4>
+            <ul>
+              <li>Recusa o lote que não passa na inspeção.</li>
+              <li>Não declara necessidade acima do que consegue guardar.</li>
+              <li>Só confirma a entrega depois de receber.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="interacoes">
+      <h2>Modelo de interações preliminar</h2>
+      <p class="sub">Oito protocolos, cada um com iniciador, respondentes, propósito, entradas, saídas e processamento.</p>
+      <div class="protos">
+        <article class="proto">
+          <div class="proto-head"><h3>AnunciarNecessidade</h3><span class="who">Receptor → Doadores</span></div>
+          <p class="purpose">Tornar conhecidas as necessidades permanentes</p>
+          <dl>
+            <dt>Entradas</dt><dd>Categorias, kg, janela, capacidade de frio</dd>
+            <dt>Saídas</dt><dd>Lista de necessidades conhecidas por cada doador</dd>
+            <dt>Processamento</dt><dd>O doador guarda a necessidade e usa-a ao escolher destinos</dd>
+          </dl>
+        </article>
+        <article class="proto">
+          <div class="proto-head"><h3>AnunciarOferta</h3><span class="who">Doador → Receptores e Armazenadores</span></div>
+          <p class="purpose">Escolher o destino do lote</p>
+          <dl>
+            <dt>Entradas</dt><dd>Lote (categoria, kg, vida útil, frio, local, janela)</dd>
+            <dt>Saídas</dt><dd>Destino escolhido</dd>
+            <dt>Processamento</dt><dd>Cada candidato responde com aceite, quantidade e janela; o doador compara por adequação e distância e escolhe</dd>
+          </dl>
+        </article>
+        <article class="proto">
+          <div class="proto-head"><h3>ContratarResgate</h3><span class="who">Doador → Resgatadores</span></div>
+          <p class="purpose">Alocar o transporte do lote até o destino</p>
+          <dl>
+            <dt>Entradas</dt><dd>Lote, origem, destino, prazo de resposta</dd>
+            <dt>Saídas</dt><dd>Contrato doador–resgatador</dd>
+            <dt>Processamento</dt><dd>Contract Net: o resgatador estima a utilidade e propõe (tempo, risco de frio); o doador compara por prazo e reputação e aceita um</dd>
+          </dl>
+        </article>
+        <article class="proto">
+          <div class="proto-head"><h3>ConfirmarColeta</h3><span class="who">Resgatador ↔ Doador</span></div>
+          <p class="purpose">Verificar o que saiu do doador</p>
+          <dl>
+            <dt>Entradas</dt><dd>kg e temperatura declarados e medidos</dd>
+            <dt>Saídas</dt><dd>Coleta confirmada ou divergência registada</dd>
+            <dt>Processamento</dt><dd>As duas partes registam kg e temperatura; se divergirem, marcam disputa e avisam os Avaliadores</dd>
+          </dl>
+        </article>
+        <article class="proto">
+          <div class="proto-head"><h3>EntregarLote</h3><span class="who">Resgatador ↔ Receptor</span></div>
+          <p class="purpose">Entregar e verificar na chegada</p>
+          <dl>
+            <dt>Entradas</dt><dd>Lote, kg e temperatura na chegada</dd>
+            <dt>Saídas</dt><dd>Entrega confirmada, parcial ou recusada</dd>
+            <dt>Processamento</dt><dd>O receptor inspeciona; aceita ou recusa; os dois registam o resultado</dd>
+          </dl>
+        </article>
+        <article class="proto">
+          <div class="proto-head"><h3>UsarArmazenamento</h3><span class="who">Resgatador → Armazenador</span></div>
+          <p class="purpose">Reservar, depositar e retirar lote</p>
+          <dl>
+            <dt>Entradas</dt><dd>Lote, kg, categoria, tempo previsto</dd>
+            <dt>Saídas</dt><dd>Vaga reservada, depósito feito, retirada feita</dd>
+            <dt>Processamento</dt><dd>O armazenador confere capacidade e categoria; depois do depósito o relógio do frio passa a contar nele</dd>
+          </dl>
+        </article>
+        <article class="proto">
+          <div class="proto-head"><h3>TratarImprevisto</h3><span class="who">Quem detecta → partes do contrato</span></div>
+          <p class="purpose">Reagir a cancelamento, atraso ou falha de frio</p>
+          <dl>
+            <dt>Entradas</dt><dd>Tipo de evento, lote, contrato afetado</dd>
+            <dt>Saídas</dt><dd>Contrato cancelado, redirecionado ou lote descartado</dd>
+            <dt>Processamento</dt><dd>Os afetados reabrem ContratarResgate ou AnunciarOferta; sem alternativa a tempo, o lote vai para o armazenamento mais próximo ou é descartado</dd>
+          </dl>
+        </article>
+        <article class="proto">
+          <div class="proto-head"><h3>TrocarTestemunho</h3><span class="who">Avaliador → outros Avaliadores</span></div>
+          <p class="purpose">Partilhar reputação observada</p>
+          <dl>
+            <dt>Entradas</dt><dd>Agente avaliado, resultado, evidência</dd>
+            <dt>Saídas</dt><dd>Visão de reputação atualizada</dd>
+            <dt>Processamento</dt><dd>O receptor pondera o testemunho pela reputação de quem o enviou e atualiza a sua própria visão</dd>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <section id="matriz">
+      <h2>Quem participa de quê</h2>
+      <p class="sub">A mesma informação cruzada por papel. Juntei a tabela de interações com as listas de protocolos de cada papel; as células laranja são onde as duas não batem.</p>
+      <div class="legend">
+        <span><span class="mk i">I</span> inicia</span>
+        <span><span class="mk r">R</span> responde</span>
+        <span><span class="mk b">↔</span> as duas partes</span>
+        <span><span class="mk q">?</span> as fontes divergem</span>
+      </div>
+      <div class="table-wrap">
+        <table class="matrix">
+          <thead><tr><th>Protocolo</th><th class="r c-donor">Doador</th><th class="r c-resc">Resgatador</th><th class="r c-store">Armazenador</th><th class="r c-recip">Receptor</th></tr></thead>
+          <tbody>
+            <tr><td>AnunciarNecessidade</td><td><span class="mk q" title="Respondente na tabela, mas não está na lista de protocolos do Doador">R?</span></td><td></td><td></td><td><span class="mk i">I</span></td></tr>
+            <tr><td>AnunciarOferta</td><td><span class="mk i">I</span></td><td></td><td><span class="mk r">R</span></td><td><span class="mk r">R</span></td></tr>
+            <tr><td>ContratarResgate</td><td><span class="mk i">I</span></td><td><span class="mk r">R</span></td><td></td><td></td></tr>
+            <tr><td>ConfirmarColeta</td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td></td><td></td></tr>
+            <tr><td>EntregarLote</td><td></td><td><span class="mk b">↔</span></td><td></td><td><span class="mk b">↔</span></td></tr>
+            <tr><td>UsarArmazenamento</td><td><span class="mk q" title="Está na lista do Doador, mas a tabela diz Resgatador → Armazenador">?</span></td><td><span class="mk i">I</span></td><td><span class="mk r">R</span></td><td></td></tr>
+            <tr><td>TratarImprevisto</td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td></tr>
+            <tr><td>TrocarTestemunho</td><td colspan="4"><span class="mk q">?</span> &nbsp;Avaliador, que não existe no modelo de papéis</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="sequencia">
+      <h2>A vida de um lote</h2>
+      <p class="sub">Os protocolos na ordem em que acontecem para um lote. O tempo corre de cima para baixo; as setas tracejadas são respostas. As mensagens ainda não têm performativas FIPA definidas, exceto o Contract Net.</p>
+      <div class="figure">
+        <svg viewBox="0 0 780 660" role="img" aria-label="Diagrama de sequência dos protocolos entre receptor, doador, resgatador e armazenador">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="head"/>
+            </marker>
+          </defs>
+
+          <!-- faixas -->
+          <rect class="band" x="0" y="56" width="780" height="64" rx="6"/>
+          <text class="band-lbl" x="10" y="74">1 · AnunciarNecessidade (antes, permanente)</text>
+          <rect class="band" x="0" y="130" width="780" height="120" rx="6"/>
+          <text class="band-lbl" x="10" y="148">2 · AnunciarOferta</text>
+          <rect class="band" x="0" y="260" width="780" height="118" rx="6"/>
+          <text class="band-lbl" x="10" y="278">3 · ContratarResgate (Contract Net)</text>
+          <rect class="band" x="0" y="388" width="780" height="62" rx="6"/>
+          <text class="band-lbl" x="10" y="406">4 · ConfirmarColeta</text>
+          <rect class="band" x="0" y="460" width="780" height="98" rx="6"/>
+          <text class="band-lbl" x="10" y="478">5 · EntregarLote (receptor) ou UsarArmazenamento (armazenador)</text>
+          <rect class="band" x="0" y="598" width="780" height="54" rx="6"/>
+          <text class="band-lbl" x="10" y="616">Em qualquer fase · TratarImprevisto</text>
+          <text class="note" x="10" y="640">cancelamento, atraso ou falha de frio → reabre ContratarResgate ou AnunciarOferta; sem alternativa, armazena ou descarta</text>
+
+          <!-- cabeçalhos e linhas de vida -->
+          <text class="lane-head" x="90"  y="30" style="fill:var(--recip)">Receptor</text>
+          <text class="lane-head" x="290" y="30" style="fill:var(--donor)">Doador</text>
+          <text class="lane-head" x="490" y="30" style="fill:var(--resc)">Resgatador</text>
+          <text class="lane-head" x="690" y="30" style="fill:var(--store)">Armazenador</text>
+          <line class="lane" x1="90"  y1="42" x2="90"  y2="580"/>
+          <line class="lane" x1="290" y1="42" x2="290" y2="580"/>
+          <line class="lane" x1="490" y1="42" x2="490" y2="580"/>
+          <line class="lane" x1="690" y1="42" x2="690" y2="580"/>
+
+          <!-- 1 necessidade -->
+          <line class="msg" x1="90" y1="104" x2="288" y2="104" marker-end="url(#ah)"/>
+          <text class="lbl" x="190" y="98">necessidade {categorias, kg, janela, frio}</text>
+
+          <!-- 2 oferta -->
+          <line class="msg" x1="290" y1="178" x2="92" y2="178" marker-end="url(#ah)"/>
+          <text class="lbl" x="190" y="172">oferta (lote)</text>
+          <line class="msg" x1="290" y1="178" x2="688" y2="178" marker-end="url(#ah)"/>
+          <text class="lbl" x="600" y="172">oferta (lote)</text>
+          <line class="msg reply" x1="90" y1="212" x2="288" y2="212" marker-end="url(#ah)"/>
+          <text class="lbl" x="190" y="206">aceite {kg, janela} / recusa</text>
+          <line class="msg reply" x1="690" y1="212" x2="292" y2="212" marker-end="url(#ah)"/>
+          <text class="lbl" x="600" y="206">aceite {kg, janela} / recusa</text>
+          <text class="note" x="300" y="240">doador escolhe o destino por adequação e distância</text>
+
+          <!-- 3 contract net -->
+          <line class="msg" x1="290" y1="306" x2="488" y2="306" marker-end="url(#ah)"/>
+          <text class="lbl" x="390" y="300">cfp (lote, origem, destino, prazo)</text>
+          <line class="msg reply" x1="490" y1="338" x2="292" y2="338" marker-end="url(#ah)"/>
+          <text class="lbl" x="390" y="332">propose {tempo, risco de frio}</text>
+          <line class="msg" x1="290" y1="368" x2="488" y2="368" marker-end="url(#ah)"/>
+          <text class="lbl" x="390" y="362">accept / reject</text>
+
+          <!-- 4 coleta -->
+          <line class="msg" x1="292" y1="436" x2="488" y2="436" marker-start="url(#ah)" marker-end="url(#ah)"/>
+          <text class="lbl" x="390" y="430">kg e temperatura (declarado × medido)</text>
+
+          <!-- 5 entrega ou armazenamento -->
+          <line class="msg" x1="490" y1="508" x2="92" y2="508" marker-end="url(#ah)"/>
+          <text class="lbl" x="190" y="502">lote {kg, temperatura}</text>
+          <line class="msg reply" x1="90" y1="540" x2="488" y2="540" marker-end="url(#ah)"/>
+          <text class="lbl" x="190" y="534">confirmada / parcial / recusada</text>
+          <line class="msg" x1="490" y1="508" x2="688" y2="508" marker-end="url(#ah)"/>
+          <text class="lbl" x="590" y="502">reservar · depositar</text>
+          <line class="msg reply" x1="690" y1="540" x2="492" y2="540" marker-end="url(#ah)"/>
+          <text class="lbl" x="590" y="534">vaga / depósito feito</text>
+        </svg>
+      </div>
+      <p class="caption">TrocarTestemunho fica de fora do diagrama porque depende do papel Avaliador, ainda não definido.</p>
+    </section>
+
+    <section id="aberto">
+      <h2>Pontos em aberto</h2>
+      <p class="sub">O que encontrei ao cruzar as secções do documento. São perguntas para o grupo decidir, não correções.</p>
+      <ol class="issues">
+        <li>
+          <h3>Quem é o Avaliador?</h3>
+          <p>Aparece em ConfirmarColeta ("avisam os Avaliadores") e é o iniciador de TrocarTestemunho, mas não está no modelo de papéis. Ou vira um papel, ou a reputação fica local a cada agente e TrocarTestemunho sai do v1. A segunda opção é a mais simples.</p>
+        </li>
+        <li>
+          <h3>O Doador responde a AnunciarNecessidade?</h3>
+          <p>A tabela diz Receptor → Doadores, mas AnunciarNecessidade não está na lista de protocolos do Doador.</p>
+        </li>
+        <li>
+          <h3>O Doador participa de UsarArmazenamento?</h3>
+          <p>Está na lista de protocolos do Doador, mas a tabela define o protocolo como Resgatador → Armazenador.</p>
+        </li>
+        <li>
+          <h3>Valores ainda sem número</h3>
+          <p>"Tempo mínimo útil" (Doador), "limite L fora do frio" (Resgatador e Armazenador) e as unidades da reputação. Vão virar parâmetros da simulação.</p>
+        </li>
+        <li>
+          <h3>Campos do ambiente</h3>
+          <p>Lote ("id, categoria, kg, etc") e Mapa ("nós, arestas, …") ainda têm reticências. A tabela de interações já usa vida útil, frio, local e janela no lote, o que dá uma boa lista de partida.</p>
+        </li>
+        <li>
+          <h3>Regras organizacionais</h3>
+          <p>A análise Gaia termina com regras organizacionais (regras de vivacidade e segurança da organização como um todo, não de cada papel). O documento ainda não as tem.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="proximos">
+      <h2>Próximos passos</h2>
+      <p class="sub">Para fechar a análise e passar ao design, mantendo o v1 pequeno.</p>
+      <div class="two">
+        <div class="card">
+          <h3>1 · Resolver os pontos em aberto</h3>
+          <p>Principalmente o Avaliador: é a decisão que mais mexe no tamanho do modelo.</p>
+        </div>
+        <div class="card">
+          <h3>2 · Escrever as regras organizacionais</h3>
+          <p>E as regras de vivacidade de cada papel (a ordem das atividades e protocolos), que completam o modelo de papéis Gaia.</p>
+        </div>
+        <div class="card">
+          <h3>3 · Escolher o núcleo a implementar primeiro</h3>
+          <p>Sugestão a discutir: AnunciarOferta + ContratarResgate + EntregarLote já fazem um lote ir do restaurante ao receptor. O resto entra depois, um protocolo de cada vez.</p>
+        </div>
+        <div class="card">
+          <h3>4 · Design arquitetural</h3>
+          <p>Mapear papéis para tipos de agente e definir as performativas FIPA de cada protocolo. O <code>docs/03-interacoes-fipa.md</code> serve de ponto de partida.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>Food Rescue Descentralizado · SPADE · guia do v1 · fonte: Food Rescue - Gaia.docx</footer>
+  </main>
+</div>
+
+</body>
+</html>

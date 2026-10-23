@@ -14,6 +14,7 @@ Metodologia: **Gaia** (Zambonelli, Jennings & Wooldridge, 2003).
 | [`docs/02-analise-gaia.md`](docs/02-analise-gaia.md) | Fase 1, análise Gaia: sub-organizações, ambiente, papéis, interações preliminares, regras organizacionais | Rascunho a validar |
 | [`docs/03-interacoes-fipa.md`](docs/03-interacoes-fipa.md) | Speech Acts, FIPA-ACL, Contract Net; mapeamento para os nossos protocolos | Proposta para o design |
 | `v0/` | Protótipo de referência (exploração inicial do SPADE); **não é a implementação final** | Referência |
+| [`v1/guia_v1.html`](v1/guia_v1.html) | Modelo v1, feito pelo grupo e mais simples (só restaurantes como doadores): guia da análise Gaia a partir do `Food Rescue - Gaia.docx` | Análise preliminar |
 | `src/` | Implementação do grupo | A fazer |
 
 ## Processo Gaia (Fig. 6 do artigo) e onde estamos
