@@ -1,23 +1,23 @@
 {
   "scenario": "S1",
   "seed": 42,
-  "items_offered": 79,
-  "kg_offered": 1128.5,
-  "kg_delivered": 908.2,
-  "kg_wasted": 62.5,
-  "kg_pending_at_end": 157.8,
-  "rescue_rate": 0.805,
+  "items_offered": 82,
+  "kg_offered": 1190.5,
+  "kg_delivered": 944.8,
+  "kg_wasted": 70.4,
+  "kg_pending_at_end": 175.3,
+  "rescue_rate": 0.794,
   "waste_by_reason_kg": {
-    "expired_unmatched": 42.5,
-    "expired_in_fridge": 20.0
+    "expired_unmatched": 58.1,
+    "expired_in_fridge": 12.3
   },
-  "avg_offer_to_delivery_min": 53.0,
+  "avg_offer_to_delivery_min": 64.0,
   "cold_chain_violations": 0,
-  "transport_failures": 4,
-  "recovery_rate": 0.75,
-  "km_per_kg_delivered": 0.857,
-  "jain_fairness": 0.953,
-  "msgs_sent": 4161,
+  "transport_failures": 3,
+  "recovery_rate": 0.5,
+  "km_per_kg_delivered": 0.87,
+  "jain_fairness": 0.95,
+  "msgs_sent": 4662,
   "msgs_lost": 0,
-  "msgs_per_delivery": 65.0
+  "msgs_per_delivery": 75.2
 }
