@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia Food Rescue</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface-2: #f0eee8;
+    --ink: #1d1f1c;
+    --ink-2: #4a4e47;
+    --ink-3: #7a7f76;
+    --line: #dedbd2;
+    --accent: #2f7d4f;
+    --accent-soft: #e2f0e6;
+    --warn: #b5562b;
+    --warn-soft: #f7e6dc;
+    --donor: #c07a12;
+    --recip: #2f7d4f;
+    --resc: #2b6cb0;
+    --fridge: #6b5bb5;
+    --code-bg: #efece4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151714;
+      --surface: #1d201c;
+      --surface-2: #252923;
+      --ink: #e9ebe5;
+      --ink-2: #b9bdb3;
+      --ink-3: #8a8f85;
+      --line: #343930;
+      --accent: #6cc38f;
+      --accent-soft: #1f3327;
+      --warn: #e58f63;
+      --warn-soft: #3a2519;
+      --donor: #e5a64a;
+      --recip: #6cc38f;
+      --resc: #6ea8e6;
+      --fridge: #a497e6;
+      --code-bg: #262a24;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151714;
+    --surface: #1d201c;
+    --surface-2: #252923;
+    --ink: #e9ebe5;
+    --ink-2: #b9bdb3;
+    --ink-3: #8a8f85;
+    --line: #343930;
+    --accent: #6cc38f;
+    --accent-soft: #1f3327;
+    --warn: #e58f63;
+    --warn-soft: #3a2519;
+    --donor: #e5a64a;
+    --recip: #6cc38f;
+    --resc: #6ea8e6;
+    --fridge: #a497e6;
+    --code-bg: #262a24;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  @media (min-width: 900px) {
+    .wrap { grid-template-columns: 200px 1fr; padding: 0 32px 96px; }
+    nav.toc { position: sticky; top: 24px; align-self: start; }
+  }
+
+  header.hero {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 16px 32px;
+  }
+  @media (min-width: 900px) { header.hero { padding: 72px 32px 40px; } }
+  .eyebrow {
+    font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin: 0 0 8px;
+  }
+  h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.15; margin: 0 0 16px; letter-spacing: -.01em; }
+  .lede { font-size: 19px; color: var(--ink-2); max-width: 680px; margin: 0; }
+  .lede strong { color: var(--ink); }
+
+  nav.toc { font-size: 14px; }
+  nav.toc p { margin: 0 0 8px; color: var(--ink-3); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  @media (min-width: 900px) { nav.toc ol { display: block; } nav.toc li { margin: 0 0 6px; } }
+  nav.toc a { color: var(--ink-2); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); }
+
+  main { min-width: 0; }
+  section { margin: 0 0 56px; scroll-margin-top: 24px; }
+  h2 { font-size: 24px; margin: 0 0 6px; letter-spacing: -.005em; }
+  .sub { color: var(--ink-3); margin: 0 0 20px; }
+  h3 { font-size: 17px; margin: 0 0 6px; }
+  p { margin: 0 0 14px; }
+  code {
+    font: 0.88em/1.4 ui-monospace, "Cascadia Code", Consolas, monospace;
+    background: var(--code-bg); padding: 1px 6px; border-radius: 4px;
+  }
+  pre {
+    background: var(--code-bg); padding: 14px 16px; border-radius: 8px;
+    overflow-x: auto; font: 14px/1.5 ui-monospace, "Cascadia Code", Consolas, monospace; margin: 0 0 14px;
+  }
+  pre code { background: none; padding: 0; }
+
+  .callout {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 0 0 16px;
+  }
+  .callout.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .callout p:last-child { margin: 0; }
+
+  /* agentes */
+  .agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .agent {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; border-top: 4px solid var(--c);
+  }
+  .agent .count { font-size: 13px; color: var(--ink-3); }
+  .agent h3 { color: var(--c); margin-bottom: 2px; }
+  .agent .real { font-size: 14px; color: var(--ink-3); margin: 0 0 10px; }
+  .agent p { font-size: 15px; margin: 0 0 10px; }
+  .agent .file { font-size: 13px; }
+  .c-donor { --c: var(--donor); }
+  .c-recip { --c: var(--recip); }
+  .c-resc { --c: var(--resc); }
+  .c-fridge { --c: var(--fridge); }
+
+  /* passos */
+  ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  ol.steps > li {
+    counter-increment: s; position: relative; padding: 0 0 22px 48px;
+    border-left: 2px solid var(--line); margin-left: 15px;
+  }
+  ol.steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: -16px; top: -2px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--accent); color: var(--accent);
+    font-weight: 700; font-size: 14px; display: grid; place-items: center;
+  }
+  ol.steps h3 { margin-top: 2px; }
+  ol.steps p { color: var(--ink-2); font-size: 15px; }
+  .phase { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600; margin: 0 0 4px; }
+
+  /* diagrama */
+  .figure {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; margin: 0 0 12px; overflow-x: auto;
+  }
+  .figure svg { display: block; width: 100%; min-width: 640px; height: auto; }
+  .caption { font-size: 14px; color: var(--ink-3); margin: 0 0 16px; }
+  svg .lane-head { font: 600 14px system-ui, sans-serif; text-anchor: middle; }
+  svg .lane { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  svg .msg { stroke: var(--ink-2); stroke-width: 1.6; fill: none; }
+  svg .msg.reply { stroke-dasharray: 6 4; }
+  svg .lbl { font: 13px system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
+  svg .note { font: italic 13px system-ui, sans-serif; fill: var(--ink-3); }
+  svg .band { fill: var(--surface-2); }
+  svg .band-lbl { font: 600 12px system-ui, sans-serif; fill: var(--ink-3); letter-spacing: .06em; }
+  svg .head { fill: var(--ink-2); }
+
+  /* tabelas */
+  .table-wrap { overflow-x: auto; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th { font-size: 13px; color: var(--ink-3); font-weight: 600; background: var(--surface-2); }
+  td:first-child { white-space: nowrap; }
+
+  /* métricas */
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .metric { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .metric .k { font: 13px ui-monospace, Consolas, monospace; color: var(--ink-3); }
+  .metric .v { font-size: 28px; font-weight: 700; line-height: 1.2; margin: 4px 0 6px; font-variant-numeric: tabular-nums; }
+  .metric .v small { font-size: 15px; font-weight: 500; color: var(--ink-3); }
+  .metric p { font-size: 14px; color: var(--ink-2); margin: 0; }
+  .metric.main { border-color: var(--accent); background: var(--accent-soft); }
+
+  .two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 700px) { .two { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .card p { font-size: 15px; color: var(--ink-2); }
+  .card p:last-child { margin: 0; }
+
+  footer { color: var(--ink-3); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">Food Rescue · v0 · guia rápido</p>
+  <h1>O que é o v0, explicado sem código</h1>
+  <p class="lede">É uma <strong>simulação de uma cidade onde a comida que sobra é distribuída sem nenhum chefe central</strong>. Cada participante é um agente que conversa com os outros por mensagens e decide sozinho o que fazer.</p>
+</header>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Índice">
+    <p>Nesta página</p>
+    <ol>
+      <li><a href="#agentes">Os agentes</a></li>
+      <li><a href="#fluxo">A vida de um item</a></li>
+      <li><a href="#protocolo">As mensagens</a></li>
+      <li><a href="#spade">Onde entra o SPADE</a></li>
+      <li><a href="#arquivos">Mapa de arquivos</a></li>
+      <li><a href="#cenarios">Cenários S1–S4</a></li>
+      <li><a href="#metricas">Ler os resultados</a></li>
+      <li><a href="#rodar">Como rodar</a></li>
+      <li><a href="#comecar">Por onde começar</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="agentes">
+      <h2>Os quatro tipos de agente</h2>
+      <p class="sub">Uma cidade de 10×10 km com 36 agentes em posições aleatórias. Cada um só conhece quem está a até 7 km.</p>
+      <div class="agents">
+        <div class="agent c-donor">
+          <span class="count">10 agentes</span>
+          <h3>Doador</h3>
+          <p class="real">Padaria, supermercado</p>
+          <p>A cada 20 min verifica se sobrou comida e, se sobrou, <strong>negocia sozinho o destino dela</strong>.</p>
+          <span class="file"><code>fr/donor.py</code></span>
+        </div>
+        <div class="agent c-recip">
+          <span class="count">8 agentes</span>
+          <h3>Recetor</h3>
+          <p class="real">ONG, cozinha solidária</p>
+          <p>Responde "quero" ou "não quero" a cada oferta e <strong>confere a comida quando ela chega</strong>.</p>
+          <span class="file"><code>fr/recipient.py</code></span>
+        </div>
+        <div class="agent c-resc">
+          <span class="count">15 agentes</span>
+          <h3>Voluntário</h3>
+          <p class="real">Pessoa de carro ou bicicleta</p>
+          <p>Se candidata a fazer o transporte. <strong>Às vezes desiste ou nem aparece.</strong></p>
+          <span class="file"><code>fr/rescuer.py</code></span>
+        </div>
+        <div class="agent c-fridge">
+          <span class="count">3 agentes</span>
+          <h3>Frigorífico</h3>
+          <p class="real">Geladeira comunitária</p>
+          <p>Guarda o que ninguém quis agora e <strong>oferece de novo</strong> a cada 30 min. Capacidade de 60 kg.</p>
+          <span class="file"><code>fr/fridge.py</code></span>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:16px">
+        <p><strong>O ponto central do projeto:</strong> não existe central de despacho. Quem tem a comida negocia o destino dela, e só com os vizinhos.</p>
+      </div>
+    </section>
+
+    <section id="fluxo">
+      <h2>A vida de um item</h2>
+      <p class="sub">Quase toda a lógica está num arquivo só, o <code>fr/offer.py</code>. Cada comida que sobra ganha a sua própria "conversa".</p>
+      <ol class="steps">
+        <li>
+          <p class="phase">Escolher destino · offer-cnp</p>
+          <h3>"Tenho 12 kg de pão, vence em 6 h. Quem quer?"</h3>
+          <p>O doador manda a oferta para todos os recetores vizinhos.</p>
+        </li>
+        <li>
+          <h3>Os recetores respondem</h3>
+          <p>"Quero 10 kg, minha urgência é 3" ou "não quero". A recusa acontece quando o recetor não aceita esse tipo de comida, já está cheio ou o doador tem má reputação (abaixo de 0,35).</p>
+        </li>
+        <li>
+          <h3>O doador dá uma nota e escolhe</h3>
+<pre><code>nota = urgência × kg_que_quer ÷ (1 + já_recebeu/20)  −  0,5 × distância</code></pre>
+          <p>O "÷ já recebeu" é a <strong>equidade</strong>: evita que a mesma ONG receba tudo. Se nenhum recetor quiser, tenta um <strong>frigorífico</strong> (deposit). Se nem isso, espera 15 min e tenta de novo.</p>
+        </li>
+        <li>
+          <p class="phase">Contratar transporte · transport-cnp</p>
+          <h3>"Preciso levar isto daqui até a ONG X. Qual voluntário?"</h3>
+          <p>O doador manda o pedido para os voluntários vizinhos.</p>
+        </li>
+        <li>
+          <h3>Os voluntários respondem</h3>
+          <p>"Chego em 40 min" ou "não posso". Não pode quem está ocupado, fora do turno, com veículo pequeno demais ou sem refrigeração para um item refrigerado.</p>
+        </li>
+        <li>
+          <h3>O doador escolhe o melhor</h3>
+<pre><code>custo = tempo_total ÷ reputação_do_voluntário</code></pre>
+          <p>Ganha o mais rápido, mas quem tem má reputação é penalizado. Quem chegaria depois de a comida vencer é descartado.</p>
+        </li>
+        <li>
+          <p class="phase">Entrega e verificação · delivery</p>
+          <h3>O voluntário busca e entrega</h3>
+          <p><strong>Deu certo:</strong> o recetor confere se está vencido, se quebrou a cadeia de frio ou se o rótulo está errado (a inspeção pega 85% desses casos). <strong>O voluntário desistiu ou sumiu:</strong> o doador baixa a reputação dele e contrata outro, até 4 tentativas.</p>
+        </li>
+        <li>
+          <h3>Fim</h3>
+          <p>O item termina como <strong>entregue</strong> ou <strong>desperdiçado</strong>. Se faltarem menos de 15 min para vencer e ele ainda não tiver chegado, conta como desperdício.</p>
+        </li>
+      </ol>
+      <div class="callout" style="margin-top:20px">
+        <p>Esse formato de "anuncio, todo mundo dá um lance, eu escolho" chama-se <strong>Contract Net Protocol (CNP)</strong>. É o termo para o relatório e a apresentação.</p>
+      </div>
+    </section>
+
+    <section id="protocolo">
+      <h2>As mensagens trocadas</h2>
+      <p class="sub">O mesmo fluxo como diagrama de sequência. O tempo corre de cima para baixo; as setas tracejadas são respostas.</p>
+      <div class="figure">
+        <svg viewBox="0 0 780 520" role="img" aria-label="Diagrama de sequência das mensagens entre doador, recetores, frigorífico e voluntários">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="head"/>
+            </marker>
+          </defs>
+
+          <!-- faixas -->
+          <rect class="band" x="0" y="56" width="780" height="118" rx="6"/>
+          <text class="band-lbl" x="10" y="74">1 · OFFER-CNP</text>
+          <rect class="band" x="0" y="184" width="780" height="88" rx="6"/>
+          <text class="band-lbl" x="10" y="202">2 · DEPOSIT (só se ninguém quiser)</text>
+          <rect class="band" x="0" y="282" width="780" height="118" rx="6"/>
+          <text class="band-lbl" x="10" y="300">3 · TRANSPORT-CNP</text>
+          <rect class="band" x="0" y="410" width="780" height="100" rx="6"/>
+          <text class="band-lbl" x="10" y="428">4 · DELIVERY</text>
+
+          <!-- cabeçalhos e linhas de vida -->
+          <text class="lane-head" x="90"  y="30" fill="var(--donor)">Doador</text>
+          <text class="lane-head" x="300" y="30" fill="var(--recip)">Recetores</text>
+          <text class="lane-head" x="500" y="30" fill="var(--fridge)">Frigorífico</text>
+          <text class="lane-head" x="700" y="30" fill="var(--resc)">Voluntários</text>
+          <line class="lane" x1="90"  y1="42" x2="90"  y2="512"/>
+          <line class="lane" x1="300" y1="42" x2="300" y2="512"/>
+          <line class="lane" x1="500" y1="42" x2="500" y2="512"/>
+          <line class="lane" x1="700" y1="42" x2="700" y2="512"/>
+
+          <!-- 1 offer-cnp -->
+          <line class="msg" x1="90" y1="98" x2="298" y2="98" marker-end="url(#ah)"/>
+          <text class="lbl" x="195" y="92">cfp (item)</text>
+          <line class="msg reply" x1="300" y1="130" x2="92" y2="130" marker-end="url(#ah)"/>
+          <text class="lbl" x="195" y="124">propose {kg, urgência} / refuse</text>
+          <line class="msg" x1="90" y1="162" x2="298" y2="162" marker-end="url(#ah)"/>
+          <text class="lbl" x="195" y="156">accept / reject</text>
+
+          <!-- 2 deposit -->
+          <line class="msg" x1="90" y1="228" x2="498" y2="228" marker-end="url(#ah)"/>
+          <text class="lbl" x="400" y="222">request (item)</text>
+          <line class="msg reply" x1="500" y1="260" x2="92" y2="260" marker-end="url(#ah)"/>
+          <text class="lbl" x="400" y="254">agree / refuse</text>
+
+          <!-- 3 transport-cnp -->
+          <line class="msg" x1="90" y1="326" x2="698" y2="326" marker-end="url(#ah)"/>
+          <text class="lbl" x="560" y="320">cfp (item, origem, destino)</text>
+          <line class="msg reply" x1="700" y1="358" x2="92" y2="358" marker-end="url(#ah)"/>
+          <text class="lbl" x="560" y="352">propose {eta, km} / refuse</text>
+          <line class="msg" x1="90" y1="390" x2="698" y2="390" marker-end="url(#ah)"/>
+          <text class="lbl" x="560" y="384">accept / reject</text>
+
+          <!-- 4 delivery -->
+          <line class="msg" x1="700" y1="454" x2="302" y2="454" marker-end="url(#ah)"/>
+          <text class="lbl" x="500" y="448">inform (entrega + checks) → recetor ou frigorífico</text>
+          <line class="msg reply" x1="700" y1="490" x2="92" y2="490" marker-end="url(#ah)"/>
+          <text class="lbl" x="400" y="484">inform {done} / failure</text>
+          <text class="note" x="100" y="508">falhou ou silêncio → nova ronda de transporte (até 4×)</text>
+        </svg>
+      </div>
+      <p class="caption">Detalhe completo dos campos em <code>fr/protocol.py</code>. O frigorífico reutiliza o mesmo fluxo para voltar a oferecer o stock que guarda.</p>
+    </section>
+
+    <section id="spade">
+      <h2>Onde entra o SPADE</h2>
+      <p class="sub">O SPADE é a biblioteca que faz os agentes existirem e trocarem mensagens (via XMPP, o mesmo protocolo de chats). Só são precisos quatro conceitos.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Conceito</th><th>O que é</th><th>Exemplo no código</th></tr></thead>
+          <tbody>
+            <tr><td><code>Agent</code></td><td>Um participante com endereço próprio</td><td><code>donor3@localhost</code></td></tr>
+            <tr><td><code>PeriodicBehaviour</code></td><td>Tarefa que roda de X em X tempo</td><td>Doador olha o stock a cada 20 min</td></tr>
+            <tr><td><code>CyclicBehaviour</code></td><td>Tarefa que roda sem parar</td><td>A <strong>Inbox</strong> à espera de mensagens (<code>fr/base.py</code>)</td></tr>
+            <tr><td><code>OneShotBehaviour</code></td><td>Tarefa que roda uma vez</td><td>Um <code>OfferBehaviour</code> por item</td></tr>
+            <tr><td><code>Message</code> + <code>Template</code></td><td>A mensagem (tipo + JSON) e o filtro que decide quem a recebe</td><td><code>fr/protocol.py</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>O truque que confunde no começo, o campo <code>dir</code>:</strong> mensagem que <em>começa</em> uma conversa (<code>dir=init</code>) vai para a Inbox do agente. Mensagem que <em>responde</em> (<code>dir=reply</code>) vai direto para o <code>OfferBehaviour</code> daquele item, identificado pelo <code>thread</code>.</p>
+      </div>
+    </section>
+
+    <section id="arquivos">
+      <h2>Mapa de arquivos</h2>
+      <p class="sub">Tudo o que está dentro de <code>v0/</code>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Arquivo</th><th>O que tem</th></tr></thead>
+          <tbody>
+            <tr><td><code>fr/config.py</code></td><td>Todos os parâmetros e os 4 cenários. <strong>É aqui que se mexe para fazer experimentos.</strong></td></tr>
+            <tr><td><code>fr/offer.py</code></td><td>O coração: o ciclo de vida completo de um item (passos 1–8 acima)</td></tr>
+            <tr><td><code>fr/base.py</code></td><td>Classe comum a todos os agentes: posição, vizinhos, reputação, Inbox</td></tr>
+            <tr><td><code>fr/donor.py</code></td><td>Gera excedentes ao acaso (mais no fim do dia)</td></tr>
+            <tr><td><code>fr/recipient.py</code></td><td>Decide se quer a oferta e verifica a comida à chegada</td></tr>
+            <tr><td><code>fr/rescuer.py</code></td><td>Calcula se consegue fazer o transporte, executa ou falha</td></tr>
+            <tr><td><code>fr/fridge.py</code></td><td>Guarda, volta a oferecer, pode avariar</td></tr>
+            <tr><td><code>fr/protocol.py</code></td><td>Formato das mensagens</td></tr>
+            <tr><td><code>fr/world.py</code></td><td>Relógio simulado, a classe <code>Item</code> e as métricas. As métricas são só o "observador" do experimento, <strong>não são um agente</strong>.</td></tr>
+            <tr><td><code>run.py</code></td><td>Cria os 36 agentes, define vizinhanças, deixa o dia correr e grava os resultados</td></tr>
+            <tr><td><code>run_all.py</code></td><td>Corre o <code>run.py</code> para vários cenários × seeds e chama o <code>plot_results.py</code></td></tr>
+            <tr><td><code>results/</code></td><td><code>_summary.json</code> (métricas), <code>_events.csv</code> (log minuto a minuto), <code>comparison.png</code>, <code>table.csv</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">Tempo simulado: 1 min simulado = 0,05 s real. Um dia de 8 h, mais 2 h para terminar entregas, leva uns 30 s.</p>
+    </section>
+
+    <section id="cenarios">
+      <h2>Os cenários</h2>
+      <p class="sub">Definidos no fim de <code>fr/config.py</code>. Cada um muda poucos parâmetros em relação ao S1.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cenário</th><th>O que testa</th><th>O que muda</th></tr></thead>
+          <tbody>
+            <tr><td><strong>S1</strong> normal</td><td>Linha de base, tudo equilibrado</td><td>—</td></tr>
+            <tr><td><strong>S2</strong> pico + escassez</td><td>Muita sobra no fim do dia, poucos voluntários</td><td>Pico 3× após o min 360; só 40% dos voluntários em turno</td></tr>
+            <tr><td><strong>S3</strong> falhas</td><td>Robustez quando tudo dá errado</td><td>30% desistem; frigorífico 0 avaria no min 200; 5% das mensagens perdem-se</td></tr>
+            <tr><td><strong>S4</strong> pouco fiáveis</td><td>Se a reputação funciona</td><td>25% da comida com rótulo errado; 30% dos voluntários somem 60% das vezes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="metricas">
+      <h2>Como ler os resultados</h2>
+      <p class="sub">Valores de exemplo: S1, seed 42 (uma corrida, só indicativa).</p>
+      <div class="metrics">
+        <div class="metric main">
+          <div class="k">rescue_rate</div>
+          <div class="v">79%</div>
+          <p><strong>A métrica principal.</strong> Fração dos kg oferecidos que chegou a quem precisava.</p>
+        </div>
+        <div class="metric">
+          <div class="k">kg_wasted</div>
+          <div class="v">70,4 <small>kg</small></div>
+          <p>Desperdício. Quase todo é <code>expired_unmatched</code>: venceu sem ninguém querer.</p>
+        </div>
+        <div class="metric">
+          <div class="k">kg_pending_at_end</div>
+          <div class="v">175,3 <small>kg</small></div>
+          <p>O dia acabou com isto ainda no frigorífico ou na estrada.</p>
+        </div>
+        <div class="metric">
+          <div class="k">avg_offer_to_delivery_min</div>
+          <div class="v">64 <small>min</small></div>
+          <p>Tempo médio entre a oferta e a entrega.</p>
+        </div>
+        <div class="metric">
+          <div class="k">transport_failures · recovery_rate</div>
+          <div class="v">3 <small>· 50%</small></div>
+          <p>Transportes que falharam, e quantos dos itens afetados foram entregues mesmo assim.</p>
+        </div>
+        <div class="metric">
+          <div class="k">jain_fairness</div>
+          <div class="v">0,95</div>
+          <p>Se a comida foi bem dividida entre as ONGs. 1 = perfeitamente igual.</p>
+        </div>
+        <div class="metric">
+          <div class="k">msgs_per_delivery</div>
+          <div class="v">75</div>
+          <p>Custo de comunicação: mensagens gastas por entrega.</p>
+        </div>
+        <div class="metric">
+          <div class="k">cold_chain_violations</div>
+          <div class="v">0</div>
+          <p>Itens refrigerados que ficaram tempo demais fora do frio.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="rodar">
+      <h2>Como rodar</h2>
+      <p class="sub">Na raiz do projeto, com o uv instalado.</p>
+<pre><code>uv sync                                   # instala as dependências (spade, matplotlib, greenlet)
+cd v0
+..\.venv\Scripts\python run.py --scenario S1            # ~35 s
+..\.venv\Scripts\python run.py --scenario S3 --seed 7   # outro cenário / seed
+..\.venv\Scripts\python run_all.py                      # S1..S4 × 3 seeds + gráfico (6–8 min)</code></pre>
+      <p>No PyCharm, com o interpretador apontando para o <code>.venv</code> do projeto, basta clicar com o botão direito em <code>run.py</code> e escolher <em>Run</em>. Para passar o cenário: <em>Modify Run Configuration → Parameters</em> → <code>--scenario S1</code>.</p>
+      <div class="callout warn">
+        <p>Não rode duas simulações ao mesmo tempo: cada uma arranca um servidor XMPP na porta 5222, e a segunda falha.</p>
+      </div>
+    </section>
+
+    <section id="comecar">
+      <h2>Por onde começar</h2>
+      <p class="sub">O código já funciona de ponta a ponta. O trabalho é entender, melhorar, documentar (Gaia) e avaliar.</p>
+      <div class="two">
+        <div class="card">
+          <h3>1 · Mudar um parâmetro</h3>
+          <p>Abre <code>fr/config.py</code>, muda <code>n_rescuers</code> de 15 para 5, roda o S1 e compara o <code>rescue_rate</code>. É a forma mais rápida de sentir o sistema.</p>
+        </div>
+        <div class="card">
+          <h3>2 · Ler o <code>fr/offer.py</code></h3>
+          <p>Com a secção <a href="#fluxo">A vida de um item</a> do lado. Cada método corresponde a um bloco: <code>choose_recipient</code>, <code>choose_fridge</code>, <code>contract_rescuer</code>, <code>wait_outcome</code>.</p>
+        </div>
+        <div class="card">
+          <h3>3 · Ver as melhorias</h3>
+          <p>A secção 5 do <code>README.md</code> lista o que falta, por prioridade: RF05 explícito, backoff nas re-ofertas, turnos, reputação melhor, visualização, testes.</p>
+        </div>
+        <div class="card">
+          <h3>4 · Pegar a sua frente</h3>
+          <p>A secção 6 do <code>README.md</code> tem o cronograma até 19–20 nov e a divisão entre A Mercado, B Logística, C Confiança e D Avaliação.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>Food Rescue Descentralizado · SPADE · guia do v0</footer>
+  </main>
+</div>
+
+</body>
+</html>
