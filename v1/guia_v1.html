@@ -21,6 +21,7 @@
     --recip: #2f7d4f;
     --resc: #2b6cb0;
     --store: #6b5bb5;
+    --oper: #b0457a;
     --code-bg: #efece4;
   }
   @media (prefers-color-scheme: dark) {
@@ -40,6 +41,7 @@
       --recip: #6cc38f;
       --resc: #6ea8e6;
       --store: #a497e6;
+      --oper: #e58fb9;
       --code-bg: #262a24;
     }
   }
@@ -59,6 +61,7 @@
     --recip: #6cc38f;
     --resc: #6ea8e6;
     --store: #a497e6;
+    --oper: #e58fb9;
     --code-bg: #262a24;
   }
 
@@ -127,6 +130,10 @@
   .c-recip { --c: var(--recip); }
   .c-resc { --c: var(--resc); }
   .c-store { --c: var(--store); }
+  .c-oper { --c: var(--oper); }
+  pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 0 0 16px; }
+  pre code { background: none; padding: 0; }
+  #codigo h3 { margin-top: 22px; }
 
   /* processo gaia */
   .process { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 0 0 14px; }
@@ -246,43 +253,45 @@
 <body>
 
 <header class="hero">
-  <p class="eyebrow">Food Rescue · v1 · análise Gaia</p>
+  <p class="eyebrow">Food Rescue · v1 · análise Gaia · revisão do armazém</p>
   <h1>O modelo v1, simples desde o início</h1>
-  <p class="lede">Uma rede de <strong>restaurantes, voluntários, geladeiras comunitárias e receptores</strong> que leva a comida que sobra a quem precisa, sem central de despacho. Esta página resume a análise Gaia do documento <code>Food Rescue - Gaia.docx</code>.</p>
+  <p class="lede">Restaurantes entregam o excedente a <strong>um armazém central de alimentos</strong> (como o Banco Alimentar), com zonas de armazenamento e voluntários que trabalham lá dentro. <strong>ONGs e abrigos</strong> recebem. Voluntários com veículo fazem o transporte. Ninguém despacha: cada um negocia só o que é seu.</p>
 </header>
 
 <div class="wrap">
   <nav class="toc" aria-label="Índice">
     <p>Nesta página</p>
     <ol>
-      <li><a href="#ideia">A ideia do v1</a></li>
+      <li><a href="#ideia">O que mudou</a></li>
       <li><a href="#gaia">Onde estamos</a></li>
       <li><a href="#organizacao">Sub-organizações</a></li>
       <li><a href="#ambiente">Modelo de ambiente</a></li>
+      <li><a href="#armazem">O armazém por dentro</a></li>
       <li><a href="#papeis">Modelo de papéis</a></li>
       <li><a href="#interacoes">Modelo de interações</a></li>
       <li><a href="#matriz">Quem participa de quê</a></li>
       <li><a href="#sequencia">A vida de um lote</a></li>
-      <li><a href="#aberto">Pontos em aberto</a></li>
-      <li><a href="#proximos">Próximos passos</a></li>
+      <li><a href="#aberto">Decisões em aberto</a></li>
+      <li><a href="#codigo">Antes do código</a></li>
     </ol>
   </nav>
 
   <main>
     <section id="ideia">
-      <h2>A ideia do v1</h2>
-      <p class="sub">O v0 foi gerado por inteiro pelo Claude e fica só como referência. O v1 é feito pelo grupo, do zero.</p>
+      <h2>O que mudou</h2>
+      <p class="sub">Duas simplificações em relação à primeira versão do v1, a pedido do professor e do grupo.</p>
       <div class="callout">
-        <p><strong>Começar simples.</strong> O professor recomendou partir de um modelo pequeno: as coisas tendem a complicar com o tempo, e um modelo que já começa complexo fica inviável. Por isso o v1 tem um único tipo de doador, o <strong>restaurante</strong>.</p>
+        <p><strong>Começar simples.</strong> As coisas tendem a complicar com o tempo, e um modelo que já começa complexo fica inviável. Por isso: um só tipo de doador (restaurante), um só armazém e só duas classes de receptor.</p>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th></th><th>v0 (referência)</th><th>v1 (este modelo)</th></tr></thead>
+          <thead><tr><th></th><th>Antes</th><th>Agora</th></tr></thead>
           <tbody>
-            <tr><td>Origem</td><td>Gerado pelo Claude, com código pronto</td><td>Feito pelo grupo, a partir da análise Gaia</td></tr>
-            <tr><td>Doadores</td><td>Padarias e supermercados</td><td>Só restaurantes</td></tr>
-            <tr><td>Nomes dos papéis</td><td>Doador, Recetor, Voluntário, Frigorífico</td><td>Doador, Receptor, Resgatador, Armazenador</td></tr>
-            <tr><td>Ponto de partida</td><td>Implementação SPADE</td><td>Documentação Gaia; o código vem depois</td></tr>
+            <tr><td>Armazenamento</td><td>Várias geladeiras comunitárias espalhadas</td><td><strong>Um armazém</strong> com zonas (seco, refrigerado, congelado), cada uma com a sua capacidade</td></tr>
+            <tr><td>Trabalho interno</td><td>Não existia</td><td><strong>Operadores voluntários</strong> com funções: receber e armazenar, controlar estoque, preparar pedidos</td></tr>
+            <tr><td>Receptores</td><td>ONGs, abrigos e famílias</td><td><strong>ONGs e abrigos</strong>. Famílias ficam para depois: são mais delicadas e não têm a estrutura de uma entidade</td></tr>
+            <tr><td>Papéis</td><td>Doador, Receptor, Resgatador, Armazenador</td><td>Doador, Receptor, Resgatador, Armazenador (o armazém) e <strong>Operador</strong> (novo)</td></tr>
+            <tr><td>Protocolos</td><td>8</td><td>7: sai <code>UsarArmazenamento</code> (fundido nos outros) e <code>TrocarTestemunho</code> (reputação fica local); entra <code>DistribuirTarefas</code> (interno ao armazém)</td></tr>
           </tbody>
         </table>
       </div>
@@ -290,7 +299,7 @@
 
     <section id="gaia">
       <h2>Onde estamos no processo Gaia</h2>
-      <p class="sub">O documento cobre a fase de análise: sub-organizações, ambiente, papéis e interações, todos em versão preliminar.</p>
+      <p class="sub">Análise quase fechada. Falta decidir os pontos em aberto, escrever as regras organizacionais e passar ao design.</p>
       <div class="process">
         <div class="stage done"><span class="tag">feito</span><b>0 · Requisitos</b>objetivos e atores</div>
         <div class="stage now"><span class="tag">agora</span><b>1 · Análise</b>ambiente, papéis, interações e regras</div>
@@ -303,24 +312,49 @@
 
     <section id="organizacao">
       <h2>Sub-organizações</h2>
-      <p class="sub">A rede divide-se em quatro grupos. Cada um corresponde a um papel.</p>
+      <p class="sub">A rede divide-se em quatro grupos.</p>
       <div class="tiles">
         <div class="tile c-donor"><h3>Doadores</h3><p>Restaurantes. Papel: Doador.</p></div>
         <div class="tile c-resc"><h3>Transporte</h3><p>Voluntários com veículo. Papel: Resgatador.</p></div>
-        <div class="tile c-store"><h3>Armazenamento</h3><p>Geladeiras e despensas comunitárias. Papel: Armazenador.</p></div>
-        <div class="tile c-recip"><h3>Distribuição</h3><p>ONGs, abrigos e famílias. Papel: Receptor.</p></div>
+        <div class="tile c-store"><h3>Armazém</h3><p>O armazém e os voluntários que trabalham lá. Papéis: Armazenador e Operador.</p></div>
+        <div class="tile c-recip"><h3>Distribuição</h3><p>ONGs e abrigos. Papel: Receptor.</p></div>
       </div>
     </section>
 
     <section id="ambiente">
       <h2>Modelo de ambiente</h2>
-      <p class="sub">O que existe no mundo e que os agentes leem ou alteram. Os campos ainda são preliminares.</p>
+      <p class="sub">O que existe no mundo e que os agentes leem ou alteram. A lista de campos já é a de partida para o código.</p>
       <div class="tiles">
-        <div class="tile"><p class="k">Lote</p><h3>A comida em si</h3><p>id, categoria, kg, etc. É o que circula pela rede.</p></div>
-        <div class="tile"><p class="k">Mapa</p><h3>A cidade</h3><p>Nós, arestas, … Base para distâncias e rotas.</p></div>
-        <div class="tile"><p class="k">Relógio</p><h3>O tempo</h3><p>Validade, janelas de disponibilidade e tempo fora do frio.</p></div>
-        <div class="tile"><p class="k">Necessidade</p><h3>O que cada receptor quer</h3><p>Declarada pelo receptor e lida pelos doadores.</p></div>
+        <div class="tile"><p class="k">Lote</p><h3>A comida em si</h3><p><code>id</code>, <code>doador</code>, <code>categoria</code> (seco · refrigerado · congelado), <code>kg</code>, <code>validade</code>, <code>local</code>, <code>janela_coleta</code>, <code>minutos_fora_do_frio</code>, <code>estado</code>.</p></div>
+        <div class="tile"><p class="k">Mapa</p><h3>A cidade</h3><p>Grelha com coordenadas (x, y) de cada doador, receptor e do armazém, e distância Manhattan. Sem grafo de ruas por enquanto.</p></div>
+        <div class="tile"><p class="k">Relógio</p><h3>O tempo</h3><p>Minutos simulados. Validade, janelas, turnos e tempo fora do frio.</p></div>
+        <div class="tile"><p class="k">Necessidade</p><h3>O que cada receptor quer</h3><p>Categorias aceitas, kg, janela de recebimento. Declarada pelo receptor; lida por doadores e pelo armazém.</p></div>
+        <div class="tile"><p class="k">Zona</p><h3>Parte do armazém</h3><p><code>tipo</code>, <code>capacidade_kg</code>, <code>ocupado_kg</code>, <code>temperatura</code>, <code>estado</code> (ok ou avariada). Só o armazém a altera.</p></div>
+        <div class="tile"><p class="k">Tarefa</p><h3>Trabalho interno</h3><p><code>tipo</code> (receber · controlar · preparar), <code>lote</code>, <code>duração</code>, <code>prazo</code>, <code>responsável</code>. Fica no quadro de tarefas do armazém.</p></div>
       </div>
+    </section>
+
+    <section id="armazem">
+      <h2>O armazém por dentro</h2>
+      <p class="sub">Um local, várias zonas, e voluntários que fazem o trabalho. É a parte nova do modelo.</p>
+      <div class="two">
+        <div class="card">
+          <h3>Zonas</h3>
+          <p>Cada zona guarda uma categoria e tem capacidade própria: <strong>seco</strong> (ambiente), <strong>refrigerado</strong> e <strong>congelado</strong>. Um lote só entra na zona da sua categoria. Se a zona estiver cheia ou avariada, o armazém recusa aquele lote (as outras zonas continuam a aceitar).</p>
+          <p>Se o grupo quiser uma quarta zona (por exemplo, perecível à temperatura ambiente, como pão e fruta), é só mais uma linha na tabela de parâmetros.</p>
+        </div>
+        <div class="card">
+          <h3>Operadores voluntários</h3>
+          <p>Cada operador tem <strong>funções que sabe fazer</strong> e um <strong>turno</strong>. As funções são:</p>
+          <p><strong>Receber e armazenar</strong>: confere e coloca o lote na zona.<br>
+          <strong>Controlar estoque</strong>: vigia validades e temperatura, aponta o que vai vencer.<br>
+          <strong>Preparar pedido</strong>: separa o que vai sair para um receptor.</p>
+        </div>
+      </div>
+      <div class="callout">
+        <p><strong>Por que isto importa para a simulação.</strong> Os operadores limitam a vazão do armazém: se chegam mais lotes do que os operadores conseguem receber dentro do prazo, o lote espera, e um refrigerado esperando fora do frio estraga. É o gargalo que o S2 vai explorar.</p>
+      </div>
+      <p><strong>Como os operadores escolhem trabalho (sugestão).</strong> O armazém publica tarefas num quadro; o operador livre pega a mais urgente que sabe fazer. Ninguém atribui: cada um se serve. Fica simples de codificar e continua sem despachante.</p>
     </section>
 
     <section id="papeis">
@@ -333,17 +367,17 @@
         <div class="role-grid">
           <div>
             <h4>Protocolos</h4>
-            <div class="chips"><span class="chip">AnunciarOferta</span><span class="chip">ContratarResgate</span><span class="chip">ConfirmarColeta</span><span class="chip">UsarArmazenamento</span><span class="chip">TratarImprevisto</span></div>
+            <div class="chips"><span class="chip">AnunciarNecessidade (recebe)</span><span class="chip">AnunciarOferta</span><span class="chip">ContratarResgate</span><span class="chip">ConfirmarColeta</span><span class="chip">TratarImprevisto</span></div>
             <h4>Atividades</h4>
             <div class="chips"><span class="chip act">AvaliarExcedente</span><span class="chip act">LotearEEmbalar</span><span class="chip act">DefinirPrazoMáximo</span></div>
             <h4>Permissões</h4>
-            <p class="perm">Gera lotes; altera o estado do lote até a coleta; lê mapa, relógio e a reputação de resgatadores e receptores.</p>
+            <p class="perm">Gera lotes; altera o estado do lote até a coleta; lê mapa, relógio, necessidades e a reputação local de resgatadores, receptores e do armazém.</p>
           </div>
           <div>
             <h4>Segurança</h4>
             <ul>
               <li>Só anuncia lote com validade restante maior que o tempo mínimo útil.</li>
-              <li>Informa corretamente se o lote exige frio e quantos kg tem.</li>
+              <li>Informa corretamente a categoria e os kg do lote.</li>
               <li>Mantém no máximo um contrato de transporte ativo por lote.</li>
             </ul>
           </div>
@@ -352,21 +386,21 @@
 
       <article class="role c-resc">
         <h3>Resgatador</h3>
-        <p class="desc">Voluntário com veículo, capacidade em kg, caixa térmica (sim ou não) e janela de disponibilidade. Transporta lotes entre origem e destino.</p>
+        <p class="desc">Voluntário com veículo, capacidade em kg, caixa térmica (sim ou não) e janela de disponibilidade. Transporta lotes entre origem e destino, seja do doador para o armazém ou o receptor, seja do armazém para o receptor.</p>
         <div class="role-grid">
           <div>
             <h4>Protocolos</h4>
-            <div class="chips"><span class="chip">ContratarResgate (propõe)</span><span class="chip">ConfirmarColeta</span><span class="chip">EntregarLote</span><span class="chip">UsarArmazenamento</span><span class="chip">TratarImprevisto</span></div>
+            <div class="chips"><span class="chip">ContratarResgate (propõe)</span><span class="chip">ConfirmarColeta</span><span class="chip">EntregarLote</span><span class="chip">TratarImprevisto</span></div>
             <h4>Atividades</h4>
             <div class="chips"><span class="chip act">EstimarUtilidade</span><span class="chip act">CalcularRota</span><span class="chip act">MonitorarTemperatura</span><span class="chip act">AtualizarDisponibilidade</span></div>
             <h4>Permissões</h4>
-            <p class="perm">Gera e altera o próprio estado (posição, carga, disponibilidade); altera estado e local do lote durante o transporte; lê ofertas, necessidades, mapa e reputação.</p>
+            <p class="perm">Gera e altera o próprio estado (posição, carga, disponibilidade); altera estado e local do lote durante o transporte; lê ofertas, mapa e reputação local.</p>
           </div>
           <div>
             <h4>Segurança</h4>
             <ul>
               <li>Nunca aceita mais que a capacidade.</li>
-              <li>Nunca aceita lote refrigerado sem caixa térmica.</li>
+              <li>Nunca aceita lote refrigerado ou congelado sem caixa térmica.</li>
               <li>Não deixa o lote passar do limite L fora do frio.</li>
               <li>Reporta a temperatura e o peso com honestidade.</li>
               <li>Avisa o cancelamento assim que o decide.</li>
@@ -376,21 +410,22 @@
       </article>
 
       <article class="role c-store">
-        <h3>Armazenador</h3>
-        <p class="desc">Geladeira ou despensa comunitária com capacidade em kg, faixa de temperatura e horário de acesso. Guarda lotes até alguém retirá-los.</p>
+        <h3>Armazenador <small style="font-weight:400;color:var(--ink-3)">(o armazém)</small></h3>
+        <p class="desc">O armazém como entidade da rede: responde a ofertas, recebe lotes, guarda por zona e volta a oferecer o estoque. Não decide destinos por ninguém; decide só o que entra e o que oferece. O trabalho físico é dos Operadores.</p>
         <div class="role-grid">
           <div>
             <h4>Protocolos</h4>
-            <div class="chips"><span class="chip">AnunciarOferta (responde como destino)</span><span class="chip">UsarArmazenamento</span><span class="chip">TratarImprevisto</span></div>
+            <div class="chips"><span class="chip">AnunciarOferta (responde e inicia)</span><span class="chip">AnunciarNecessidade (recebe)</span><span class="chip">ContratarResgate (inicia)</span><span class="chip">ConfirmarColeta</span><span class="chip">EntregarLote</span><span class="chip">DistribuirTarefas</span><span class="chip">TratarImprevisto</span></div>
             <h4>Atividades</h4>
-            <div class="chips"><span class="chip act">MonitorarTemperatura</span><span class="chip act">GerirInventário</span><span class="chip act">DescartarVencidos</span></div>
+            <div class="chips"><span class="chip act">ConferirCapacidadeDaZona</span><span class="chip act">MonitorarTemperatura</span><span class="chip act">GerirInventário</span><span class="chip act">DescartarVencidos</span></div>
             <h4>Permissões</h4>
-            <p class="perm">Gera e altera vagas, temperatura e inventário; altera o estado de lotes depositados (armazenado, descartado); lê o tempo e os lotes que chegam.</p>
+            <p class="perm">Gera e altera zonas, ocupação, temperatura, inventário e quadro de tarefas; altera o estado dos lotes depositados (armazenado, em preparo, descartado); lê o tempo, as necessidades e os lotes que chegam.</p>
           </div>
           <div>
             <h4>Segurança</h4>
             <ul>
-              <li>Nunca aceita lote acima da capacidade ou de categoria incompatível.</li>
+              <li>Nunca aceita lote acima da capacidade da zona ou de categoria sem zona.</li>
+              <li>Só reserva vaga se houver operador previsto para receber dentro do prazo.</li>
               <li>Avisa de imediato uma falha de refrigeração.</li>
               <li>Nunca libera lote vencido ou acima do limite fora do frio.</li>
             </ul>
@@ -398,9 +433,33 @@
         </div>
       </article>
 
+      <article class="role c-oper">
+        <h3>Operador</h3>
+        <p class="desc">Voluntário que trabalha dentro do armazém. Tem funções que sabe fazer e um turno.</p>
+        <div class="role-grid">
+          <div>
+            <h4>Protocolos</h4>
+            <div class="chips"><span class="chip">DistribuirTarefas (pega tarefa)</span><span class="chip">TratarImprevisto</span></div>
+            <h4>Atividades</h4>
+            <div class="chips"><span class="chip act">ReceberEArmazenar</span><span class="chip act">ControlarEstoque</span><span class="chip act">PrepararPedido</span><span class="chip act">AtualizarTurno</span></div>
+            <h4>Permissões</h4>
+            <p class="perm">Lê o quadro de tarefas e o inventário; altera o estado do lote que está a manusear e a tarefa que pegou; lê o próprio turno.</p>
+          </div>
+          <div>
+            <h4>Segurança</h4>
+            <ul>
+              <li>Só pega tarefa de função que sabe fazer e dentro do turno.</li>
+              <li>Uma tarefa de cada vez.</li>
+              <li>Se sair do turno ou desistir, devolve a tarefa ao quadro.</li>
+              <li>Registra a temperatura e os kg conferidos com honestidade.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
       <article class="role c-recip">
         <h3>Receptor</h3>
-        <p class="desc">ONG, abrigo ou família que declara a sua necessidade e recebe entregas.</p>
+        <p class="desc">ONG ou abrigo que declara a sua necessidade e recebe entregas. A ONG tende a aceitar volumes maiores e redistribuir; o abrigo consome e precisa de refeições e perecíveis. Na simulação a diferença é só de parâmetros.</p>
         <div class="role-grid">
           <div>
             <h4>Protocolos</h4>
@@ -408,7 +467,7 @@
             <h4>Atividades</h4>
             <div class="chips"><span class="chip act">AvaliarNecessidade</span><span class="chip act">InspecionarLote</span></div>
             <h4>Permissões</h4>
-            <p class="perm">Gera e altera as suas necessidades; altera o estado do lote ao receber ou recusar; lê lotes a caminho e a reputação de doadores e resgatadores.</p>
+            <p class="perm">Gera e altera as suas necessidades; altera o estado do lote ao receber ou recusar; lê lotes a caminho e a reputação local de doadores, resgatadores e do armazém.</p>
           </div>
           <div>
             <h4>Segurança</h4>
@@ -424,78 +483,69 @@
 
     <section id="interacoes">
       <h2>Modelo de interações preliminar</h2>
-      <p class="sub">Oito protocolos, cada um com iniciador, respondentes, propósito, entradas, saídas e processamento.</p>
+      <p class="sub">Sete protocolos. O armazém reaproveita os mesmos protocolos do doador quando oferece estoque, por isso o conjunto encolheu.</p>
       <div class="protos">
         <article class="proto">
-          <div class="proto-head"><h3>AnunciarNecessidade</h3><span class="who">Receptor → Doadores</span></div>
+          <div class="proto-head"><h3>AnunciarNecessidade</h3><span class="who">Receptor → Doadores e Armazém</span></div>
           <p class="purpose">Tornar conhecidas as necessidades permanentes</p>
           <dl>
-            <dt>Entradas</dt><dd>Categorias, kg, janela, capacidade de frio</dd>
-            <dt>Saídas</dt><dd>Lista de necessidades conhecidas por cada doador</dd>
-            <dt>Processamento</dt><dd>O doador guarda a necessidade e usa-a ao escolher destinos</dd>
+            <dt>Entradas</dt><dd>Categorias, kg, janela de recebimento</dd>
+            <dt>Saídas</dt><dd>Lista de necessidades conhecidas por cada doador e pelo armazém</dd>
+            <dt>Processamento</dt><dd>Quem recebe guarda a necessidade e usa-a ao escolher destinos ou ao decidir o que oferecer do estoque</dd>
           </dl>
         </article>
         <article class="proto">
-          <div class="proto-head"><h3>AnunciarOferta</h3><span class="who">Doador → Receptores e Armazenadores</span></div>
-          <p class="purpose">Escolher o destino do lote</p>
+          <div class="proto-head"><h3>AnunciarOferta</h3><span class="who">Doador ou Armazém → Receptores e Armazém</span></div>
+          <p class="purpose">Escolher o destino de um lote (do doador) ou de um item do estoque (do armazém)</p>
           <dl>
-            <dt>Entradas</dt><dd>Lote (categoria, kg, vida útil, frio, local, janela)</dd>
+            <dt>Entradas</dt><dd>Lote (categoria, kg, validade, local, janela)</dd>
             <dt>Saídas</dt><dd>Destino escolhido</dd>
-            <dt>Processamento</dt><dd>Cada candidato responde com aceite, quantidade e janela; o doador compara por adequação e distância e escolhe</dd>
+            <dt>Processamento</dt><dd>Cada candidato responde com aceite (kg, janela) ou recusa. O armazém só aceita se a zona da categoria tiver espaço, estiver ok e houver operador previsto; aceitar reserva a vaga. Quem ofereceu compara por adequação e distância e escolhe</dd>
           </dl>
         </article>
         <article class="proto">
-          <div class="proto-head"><h3>ContratarResgate</h3><span class="who">Doador → Resgatadores</span></div>
+          <div class="proto-head"><h3>ContratarResgate</h3><span class="who">Doador ou Armazém → Resgatadores</span></div>
           <p class="purpose">Alocar o transporte do lote até o destino</p>
           <dl>
             <dt>Entradas</dt><dd>Lote, origem, destino, prazo de resposta</dd>
-            <dt>Saídas</dt><dd>Contrato doador–resgatador</dd>
-            <dt>Processamento</dt><dd>Contract Net: o resgatador estima a utilidade e propõe (tempo, risco de frio); o doador compara por prazo e reputação e aceita um</dd>
+            <dt>Saídas</dt><dd>Contrato entre quem tem o lote e o resgatador</dd>
+            <dt>Processamento</dt><dd>Contract Net: o resgatador estima a utilidade e propõe (tempo, risco de frio); quem tem o lote compara por prazo e reputação e aceita um</dd>
           </dl>
         </article>
         <article class="proto">
-          <div class="proto-head"><h3>ConfirmarColeta</h3><span class="who">Resgatador ↔ Doador</span></div>
-          <p class="purpose">Verificar o que saiu do doador</p>
+          <div class="proto-head"><h3>ConfirmarColeta</h3><span class="who">Resgatador ↔ Doador ou Armazém</span></div>
+          <p class="purpose">Verificar o que saiu da origem</p>
           <dl>
             <dt>Entradas</dt><dd>kg e temperatura declarados e medidos</dd>
-            <dt>Saídas</dt><dd>Coleta confirmada ou divergência registada</dd>
-            <dt>Processamento</dt><dd>As duas partes registam kg e temperatura; se divergirem, marcam disputa e avisam os Avaliadores</dd>
+            <dt>Saídas</dt><dd>Coleta confirmada ou divergência registrada</dd>
+            <dt>Processamento</dt><dd>As duas partes registram kg e temperatura; se divergirem, marcam disputa e cada uma baixa a reputação local da outra</dd>
           </dl>
         </article>
         <article class="proto">
-          <div class="proto-head"><h3>EntregarLote</h3><span class="who">Resgatador ↔ Receptor</span></div>
+          <div class="proto-head"><h3>EntregarLote</h3><span class="who">Resgatador ↔ Receptor ou Armazém</span></div>
           <p class="purpose">Entregar e verificar na chegada</p>
           <dl>
             <dt>Entradas</dt><dd>Lote, kg e temperatura na chegada</dd>
             <dt>Saídas</dt><dd>Entrega confirmada, parcial ou recusada</dd>
-            <dt>Processamento</dt><dd>O receptor inspeciona; aceita ou recusa; os dois registam o resultado</dd>
+            <dt>Processamento</dt><dd>Quem recebe inspeciona; aceita ou recusa; os dois registram o resultado. No armazém, a receção vira uma tarefa <em>receber e armazenar</em> e o relógio do frio passa a contar nele</dd>
           </dl>
         </article>
         <article class="proto">
-          <div class="proto-head"><h3>UsarArmazenamento</h3><span class="who">Resgatador → Armazenador</span></div>
-          <p class="purpose">Reservar, depositar e retirar lote</p>
+          <div class="proto-head"><h3>DistribuirTarefas</h3><span class="who">Armazém → Operadores (interno)</span></div>
+          <p class="purpose">Fazer o trabalho do armazém andar</p>
           <dl>
-            <dt>Entradas</dt><dd>Lote, kg, categoria, tempo previsto</dd>
-            <dt>Saídas</dt><dd>Vaga reservada, depósito feito, retirada feita</dd>
-            <dt>Processamento</dt><dd>O armazenador confere capacidade e categoria; depois do depósito o relógio do frio passa a contar nele</dd>
+            <dt>Entradas</dt><dd>Tarefa (tipo, lote, prazo)</dd>
+            <dt>Saídas</dt><dd>Tarefa pega e depois concluída</dd>
+            <dt>Processamento</dt><dd>O armazém publica a tarefa; o operador livre, com a função certa e dentro do turno, pega a mais urgente e responde que pegou; ao terminar, informa o resultado. Sem resposta até o prazo, a tarefa volta ao quadro</dd>
           </dl>
         </article>
         <article class="proto">
-          <div class="proto-head"><h3>TratarImprevisto</h3><span class="who">Quem detecta → partes do contrato</span></div>
-          <p class="purpose">Reagir a cancelamento, atraso ou falha de frio</p>
+          <div class="proto-head"><h3>TratarImprevisto</h3><span class="who">Quem detecta → partes afetadas</span></div>
+          <p class="purpose">Reagir a cancelamento, atraso, falta de operador ou falha de frio</p>
           <dl>
-            <dt>Entradas</dt><dd>Tipo de evento, lote, contrato afetado</dd>
-            <dt>Saídas</dt><dd>Contrato cancelado, redirecionado ou lote descartado</dd>
-            <dt>Processamento</dt><dd>Os afetados reabrem ContratarResgate ou AnunciarOferta; sem alternativa a tempo, o lote vai para o armazenamento mais próximo ou é descartado</dd>
-          </dl>
-        </article>
-        <article class="proto">
-          <div class="proto-head"><h3>TrocarTestemunho</h3><span class="who">Avaliador → outros Avaliadores</span></div>
-          <p class="purpose">Partilhar reputação observada</p>
-          <dl>
-            <dt>Entradas</dt><dd>Agente avaliado, resultado, evidência</dd>
-            <dt>Saídas</dt><dd>Visão de reputação atualizada</dd>
-            <dt>Processamento</dt><dd>O receptor pondera o testemunho pela reputação de quem o enviou e atualiza a sua própria visão</dd>
+            <dt>Entradas</dt><dd>Tipo de evento, lote, contrato ou tarefa afetados</dd>
+            <dt>Saídas</dt><dd>Contrato cancelado, redirecionado, tarefa devolvida ou lote descartado</dd>
+            <dt>Processamento</dt><dd>Os afetados reabrem ContratarResgate ou AnunciarOferta; se uma zona avaria, o armazém oferece de imediato o estoque daquela zona; sem alternativa a tempo, o lote é descartado</dd>
           </dl>
         </article>
       </div>
@@ -503,25 +553,23 @@
 
     <section id="matriz">
       <h2>Quem participa de quê</h2>
-      <p class="sub">A mesma informação cruzada por papel. Juntei a tabela de interações com as listas de protocolos de cada papel; as células laranja são onde as duas não batem.</p>
+      <p class="sub">A mesma informação cruzada por papel. Sem divergências nesta versão: as perguntas da versão anterior foram resolvidas ao simplificar.</p>
       <div class="legend">
         <span><span class="mk i">I</span> inicia</span>
         <span><span class="mk r">R</span> responde</span>
         <span><span class="mk b">↔</span> as duas partes</span>
-        <span><span class="mk q">?</span> as fontes divergem</span>
       </div>
       <div class="table-wrap">
         <table class="matrix">
-          <thead><tr><th>Protocolo</th><th class="r c-donor">Doador</th><th class="r c-resc">Resgatador</th><th class="r c-store">Armazenador</th><th class="r c-recip">Receptor</th></tr></thead>
+          <thead><tr><th>Protocolo</th><th class="r c-donor">Doador</th><th class="r c-resc">Resgatador</th><th class="r c-store">Armazém</th><th class="r c-oper">Operador</th><th class="r c-recip">Receptor</th></tr></thead>
           <tbody>
-            <tr><td>AnunciarNecessidade</td><td><span class="mk q" title="Respondente na tabela, mas não está na lista de protocolos do Doador">R?</span></td><td></td><td></td><td><span class="mk i">I</span></td></tr>
-            <tr><td>AnunciarOferta</td><td><span class="mk i">I</span></td><td></td><td><span class="mk r">R</span></td><td><span class="mk r">R</span></td></tr>
-            <tr><td>ContratarResgate</td><td><span class="mk i">I</span></td><td><span class="mk r">R</span></td><td></td><td></td></tr>
-            <tr><td>ConfirmarColeta</td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td></td><td></td></tr>
-            <tr><td>EntregarLote</td><td></td><td><span class="mk b">↔</span></td><td></td><td><span class="mk b">↔</span></td></tr>
-            <tr><td>UsarArmazenamento</td><td><span class="mk q" title="Está na lista do Doador, mas a tabela diz Resgatador → Armazenador">?</span></td><td><span class="mk i">I</span></td><td><span class="mk r">R</span></td><td></td></tr>
-            <tr><td>TratarImprevisto</td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td></tr>
-            <tr><td>TrocarTestemunho</td><td colspan="4"><span class="mk q">?</span> &nbsp;Avaliador, que não existe no modelo de papéis</td></tr>
+            <tr><td>AnunciarNecessidade</td><td><span class="mk r">R</span></td><td></td><td><span class="mk r">R</span></td><td></td><td><span class="mk i">I</span></td></tr>
+            <tr><td>AnunciarOferta</td><td><span class="mk i">I</span></td><td></td><td><span class="mk i">I</span> <span class="mk r">R</span></td><td></td><td><span class="mk r">R</span></td></tr>
+            <tr><td>ContratarResgate</td><td><span class="mk i">I</span></td><td><span class="mk r">R</span></td><td><span class="mk i">I</span></td><td></td><td></td></tr>
+            <tr><td>ConfirmarColeta</td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td></td><td></td></tr>
+            <tr><td>EntregarLote</td><td></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td></td><td><span class="mk b">↔</span></td></tr>
+            <tr><td>DistribuirTarefas</td><td></td><td></td><td><span class="mk i">I</span></td><td><span class="mk r">R</span></td><td></td></tr>
+            <tr><td>TratarImprevisto</td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td><td><span class="mk b">↔</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -529,16 +577,15 @@
 
     <section id="sequencia">
       <h2>A vida de um lote</h2>
-      <p class="sub">Os protocolos na ordem em que acontecem para um lote. O tempo corre de cima para baixo; as setas tracejadas são respostas. As mensagens ainda não têm performativas FIPA definidas, exceto o Contract Net.</p>
+      <p class="sub">Os protocolos na ordem em que acontecem para um lote. O tempo corre de cima para baixo; as setas tracejadas são respostas. Só o Contract Net já tem performativas FIPA definidas. O trabalho interno do armazém (DistribuirTarefas) fica de fora do diagrama.</p>
       <div class="figure">
-        <svg viewBox="0 0 780 660" role="img" aria-label="Diagrama de sequência dos protocolos entre receptor, doador, resgatador e armazenador">
+        <svg viewBox="0 0 780 680" role="img" aria-label="Diagrama de sequência dos protocolos entre receptor, doador, resgatador e armazém">
           <defs>
             <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 z" class="head"/>
             </marker>
           </defs>
 
-          <!-- faixas -->
           <rect class="band" x="0" y="56" width="780" height="64" rx="6"/>
           <text class="band-lbl" x="10" y="74">1 · AnunciarNecessidade (antes, permanente)</text>
           <rect class="band" x="0" y="130" width="780" height="120" rx="6"/>
@@ -548,26 +595,24 @@
           <rect class="band" x="0" y="388" width="780" height="62" rx="6"/>
           <text class="band-lbl" x="10" y="406">4 · ConfirmarColeta</text>
           <rect class="band" x="0" y="460" width="780" height="98" rx="6"/>
-          <text class="band-lbl" x="10" y="478">5 · EntregarLote (receptor) ou UsarArmazenamento (armazenador)</text>
-          <rect class="band" x="0" y="598" width="780" height="54" rx="6"/>
-          <text class="band-lbl" x="10" y="616">Em qualquer fase · TratarImprevisto</text>
-          <text class="note" x="10" y="640">cancelamento, atraso ou falha de frio → reabre ContratarResgate ou AnunciarOferta; sem alternativa, armazena ou descarta</text>
+          <text class="band-lbl" x="10" y="478">5 · EntregarLote (no receptor ou no armazém)</text>
+          <text class="note" x="10" y="584">Depois, se o lote foi para o armazém: ele repete 2 → 5 com o estoque, no papel de quem oferece.</text>
+          <rect class="band" x="0" y="606" width="780" height="54" rx="6"/>
+          <text class="band-lbl" x="10" y="624">Em qualquer fase · TratarImprevisto</text>
+          <text class="note" x="10" y="648">cancelamento, atraso, falta de operador ou falha de frio → reabre ContratarResgate ou AnunciarOferta; sem alternativa, descarta</text>
 
-          <!-- cabeçalhos e linhas de vida -->
           <text class="lane-head" x="90"  y="30" style="fill:var(--recip)">Receptor</text>
           <text class="lane-head" x="290" y="30" style="fill:var(--donor)">Doador</text>
           <text class="lane-head" x="490" y="30" style="fill:var(--resc)">Resgatador</text>
-          <text class="lane-head" x="690" y="30" style="fill:var(--store)">Armazenador</text>
-          <line class="lane" x1="90"  y1="42" x2="90"  y2="580"/>
-          <line class="lane" x1="290" y1="42" x2="290" y2="580"/>
-          <line class="lane" x1="490" y1="42" x2="490" y2="580"/>
-          <line class="lane" x1="690" y1="42" x2="690" y2="580"/>
+          <text class="lane-head" x="690" y="30" style="fill:var(--store)">Armazém</text>
+          <line class="lane" x1="90"  y1="42" x2="90"  y2="570"/>
+          <line class="lane" x1="290" y1="42" x2="290" y2="570"/>
+          <line class="lane" x1="490" y1="42" x2="490" y2="570"/>
+          <line class="lane" x1="690" y1="42" x2="690" y2="570"/>
 
-          <!-- 1 necessidade -->
           <line class="msg" x1="90" y1="104" x2="288" y2="104" marker-end="url(#ah)"/>
-          <text class="lbl" x="190" y="98">necessidade {categorias, kg, janela, frio}</text>
+          <text class="lbl" x="190" y="98">necessidade {categorias, kg, janela}</text>
 
-          <!-- 2 oferta -->
           <line class="msg" x1="290" y1="178" x2="92" y2="178" marker-end="url(#ah)"/>
           <text class="lbl" x="190" y="172">oferta (lote)</text>
           <line class="msg" x1="290" y1="178" x2="688" y2="178" marker-end="url(#ah)"/>
@@ -575,10 +620,9 @@
           <line class="msg reply" x1="90" y1="212" x2="288" y2="212" marker-end="url(#ah)"/>
           <text class="lbl" x="190" y="206">aceite {kg, janela} / recusa</text>
           <line class="msg reply" x1="690" y1="212" x2="292" y2="212" marker-end="url(#ah)"/>
-          <text class="lbl" x="600" y="206">aceite {kg, janela} / recusa</text>
+          <text class="lbl" x="600" y="206">aceite {zona, kg} / recusa</text>
           <text class="note" x="300" y="240">doador escolhe o destino por adequação e distância</text>
 
-          <!-- 3 contract net -->
           <line class="msg" x1="290" y1="306" x2="488" y2="306" marker-end="url(#ah)"/>
           <text class="lbl" x="390" y="300">cfp (lote, origem, destino, prazo)</text>
           <line class="msg reply" x1="490" y1="338" x2="292" y2="338" marker-end="url(#ah)"/>
@@ -586,79 +630,121 @@
           <line class="msg" x1="290" y1="368" x2="488" y2="368" marker-end="url(#ah)"/>
           <text class="lbl" x="390" y="362">accept / reject</text>
 
-          <!-- 4 coleta -->
           <line class="msg" x1="292" y1="436" x2="488" y2="436" marker-start="url(#ah)" marker-end="url(#ah)"/>
           <text class="lbl" x="390" y="430">kg e temperatura (declarado × medido)</text>
 
-          <!-- 5 entrega ou armazenamento -->
           <line class="msg" x1="490" y1="508" x2="92" y2="508" marker-end="url(#ah)"/>
           <text class="lbl" x="190" y="502">lote {kg, temperatura}</text>
           <line class="msg reply" x1="90" y1="540" x2="488" y2="540" marker-end="url(#ah)"/>
           <text class="lbl" x="190" y="534">confirmada / parcial / recusada</text>
           <line class="msg" x1="490" y1="508" x2="688" y2="508" marker-end="url(#ah)"/>
-          <text class="lbl" x="590" y="502">reservar · depositar</text>
+          <text class="lbl" x="600" y="502">lote {kg, temperatura}</text>
           <line class="msg reply" x1="690" y1="540" x2="492" y2="540" marker-end="url(#ah)"/>
-          <text class="lbl" x="590" y="534">vaga / depósito feito</text>
+          <text class="lbl" x="600" y="534">recebido / recusado</text>
         </svg>
       </div>
-      <p class="caption">TrocarTestemunho fica de fora do diagrama porque depende do papel Avaliador, ainda não definido.</p>
     </section>
 
     <section id="aberto">
-      <h2>Pontos em aberto</h2>
-      <p class="sub">O que encontrei ao cruzar as secções do documento. São perguntas para o grupo decidir, não correções.</p>
+      <h2>Decisões em aberto</h2>
+      <p class="sub">Onde eu escolhi um padrão para avançar. Se o grupo discordar, é fácil mudar agora e caro mudar depois do código.</p>
       <ol class="issues">
         <li>
-          <h3>Quem é o Avaliador?</h3>
-          <p>Aparece em ConfirmarColeta ("avisam os Avaliadores") e é o iniciador de TrocarTestemunho, mas não está no modelo de papéis. Ou vira um papel, ou a reputação fica local a cada agente e TrocarTestemunho sai do v1. A segunda opção é a mais simples.</p>
+          <h3>O armazém é um ponto único de falha?</h3>
+          <p>Sim, em parte, e é a tensão com o "sem despachante central" do enunciado. A resposta defensável: o armazém é um <em>serviço de armazenagem</em>, não um coordenador; não decide destinos. E o doador continua a poder oferecer direto aos receptores, então se o armazém falhar a rede ainda funciona. Vale confirmar com o professor que esta leitura serve.</p>
         </li>
         <li>
-          <h3>O Doador responde a AnunciarNecessidade?</h3>
-          <p>A tabela diz Receptor → Doadores, mas AnunciarNecessidade não está na lista de protocolos do Doador.</p>
+          <h3>Do armazém ao receptor: resgatador ou o próprio receptor retira?</h3>
+          <p>Proposta: resgatador, reaproveitando <code>ContratarResgate</code> (o armazém faz o papel do doador). É menos código do que criar um protocolo de retirada. Alternativa mais realista: ONGs buscam sozinhas.</p>
         </li>
         <li>
-          <h3>O Doador participa de UsarArmazenamento?</h3>
-          <p>Está na lista de protocolos do Doador, mas a tabela define o protocolo como Resgatador → Armazenador.</p>
+          <h3>Operadores são agentes?</h3>
+          <p>Proposta: sim, pegando tarefas de um quadro. Se faltar tempo, o fallback é o armazém ter um <em>número</em> de operadores e um tempo de processamento por tarefa, sem agentes separados.</p>
         </li>
         <li>
-          <h3>Valores ainda sem número</h3>
-          <p>"Tempo mínimo útil" (Doador), "limite L fora do frio" (Resgatador e Armazenador) e as unidades da reputação. Vão virar parâmetros da simulação.</p>
+          <h3>Quais zonas?</h3>
+          <p>Proposta: seco, refrigerado e congelado. Congelado pode sair se complicar.</p>
         </li>
         <li>
-          <h3>Campos do ambiente</h3>
-          <p>Lote ("id, categoria, kg, etc") e Mapa ("nós, arestas, …") ainda têm reticências. A tabela de interações já usa vida útil, frio, local e janela no lote, o que dá uma boa lista de partida.</p>
+          <h3>Reputação</h3>
+          <p>Fica local a cada agente. Sai o papel Avaliador e o protocolo <code>TrocarTestemunho</code>. Se sobrar tempo, volta como extra.</p>
         </li>
         <li>
           <h3>Regras organizacionais</h3>
-          <p>A análise Gaia termina com regras organizacionais (regras de vivacidade e segurança da organização como um todo, não de cada papel). O documento ainda não as tem.</p>
+          <p>Ainda por escrever: as regras de vivacidade e segurança da organização inteira. Proposta de partida: nenhum lote tem dois destinos nem dois resgatadores; todo lote termina entregue ou descartado; refrigerado nunca passa de L minutos fora do frio; falha de transporte leva sempre a nova tentativa enquanto o lote for seguro.</p>
         </li>
       </ol>
     </section>
 
-    <section id="proximos">
-      <h2>Próximos passos</h2>
-      <p class="sub">Para fechar a análise e passar ao design, mantendo o v1 pequeno.</p>
+    <section id="codigo">
+      <h2>Antes do código</h2>
+      <p class="sub">O que falta de estrutural para a aula prática. Nada aqui é longo; o objetivo é ninguém travar na hora de escrever.</p>
+
+      <h3>1 · Fechar as decisões acima</h3>
+      <p>Uns 15 minutos de reunião. Se algo ficar sem resposta, vale a proposta.</p>
+
+      <h3>2 · Tabela de parâmetros</h3>
+      <p>O código precisa de números. Valores de partida, todos para o grupo ajustar:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Parâmetro</th><th>Valor inicial</th><th>Usado por</th></tr></thead>
+          <tbody>
+            <tr><td>Zonas do armazém</td><td>seco 500 kg · refrigerado 200 kg · congelado 100 kg</td><td>Armazém</td></tr>
+            <tr><td>Operadores</td><td>4, com turnos; cada um sabe 1 ou 2 funções</td><td>Operador</td></tr>
+            <tr><td>Duração das tarefas</td><td>receber 10 min · controlar 5 min · preparar 15 min</td><td>Operador</td></tr>
+            <tr><td>Tempo mínimo útil</td><td>90 min de validade restante</td><td>Doador</td></tr>
+            <tr><td>Limite L fora do frio</td><td>60 min</td><td>Resgatador, Armazém</td></tr>
+            <tr><td>Vida útil</td><td>seco 3 dias · refrigerado 6 h · congelado 7 dias (num primeiro momento)</td><td>Lote</td></tr>
+            <tr><td>Agentes</td><td>5 restaurantes · 6 resgatadores · 1 armazém · 4 operadores · 3 ONGs · 2 abrigos</td><td>Simulação</td></tr>
+            <tr><td>Mapa</td><td>Grelha 10×10 km, distância Manhattan; carro 30 km/h, 60 kg; bicicleta 15 km/h, 15 kg</td><td>Mapa</td></tr>
+            <tr><td>Tempo</td><td>1 min simulado = 0,05 s reais; seed fixa por execução</td><td>Simulação</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3 · Formato das mensagens</h3>
+      <p>Cada mensagem SPADE leva uma performativa FIPA e um corpo. Sugestão: corpo em JSON, com o lote sempre descrito do mesmo jeito.</p>
+      <pre><code>lote = {"id": "L12", "doador": "rest1", "categoria": "refrigerado",
+        "kg": 18, "validade_min": 240, "origem": [3, 7], "janela": [1020, 1080]}
+
+AnunciarOferta      cfp            {lote}
+                    propose        {kg, janela}             (ou zona, no armazém)
+                    refuse         {motivo}
+                    accept-proposal / reject-proposal
+ContratarResgate    cfp            {lote, origem, destino, prazo}
+                    propose        {tempo_min, risco_frio}
+                    refuse | accept-proposal | reject-proposal
+EntregarLote        inform         {lote_id, kg, temperatura}
+                    inform         {resultado: confirmada|parcial|recusada}</code></pre>
+
+      <h3>4 · Papel → agente</h3>
+      <p>Um agente SPADE por entidade: <code>Restaurante</code>, <code>Resgatador</code>, <code>Armazem</code>, <code>Operador</code>, <code>ONG</code> e <code>Abrigo</code> (os dois últimos são o mesmo código com parâmetros diferentes). O <code>Armazem</code> desempenha o papel Armazenador e inicia protocolos como o Doador.</p>
+
+      <h3>5 · Ordem para programar</h3>
       <div class="two">
         <div class="card">
-          <h3>1 · Resolver os pontos em aberto</h3>
-          <p>Principalmente o Avaliador: é a decisão que mais mexe no tamanho do modelo.</p>
+          <h3>Fatia 1</h3>
+          <p>Um <code>Restaurante</code>, um <code>Resgatador</code> e uma <code>ONG</code>. O restaurante gera um lote, oferece à ONG, contrata o resgatador por Contract Net e o lote é entregue. Tudo com <code>print</code> de cada mensagem. É o que o guia já sugeria: AnunciarOferta + ContratarResgate + EntregarLote.</p>
         </div>
         <div class="card">
-          <h3>2 · Escrever as regras organizacionais</h3>
-          <p>E as regras de vivacidade de cada papel (a ordem das atividades e protocolos), que completam o modelo de papéis Gaia.</p>
+          <h3>Fatia 2</h3>
+          <p>O <code>Armazem</code> passivo: responde às ofertas com aceite ou recusa conforme a capacidade da zona, e recebe lotes. Ainda sem operadores.</p>
         </div>
         <div class="card">
-          <h3>3 · Escolher o núcleo a implementar primeiro</h3>
-          <p>Sugestão a discutir: AnunciarOferta + ContratarResgate + EntregarLote já fazem um lote ir do restaurante ao receptor. O resto entra depois, um protocolo de cada vez.</p>
+          <h3>Fatia 3</h3>
+          <p>O <code>Operador</code> e o quadro de tarefas. O armazém passa a ter tempo de processamento. Depois, o armazém volta a oferecer o estoque.</p>
         </div>
         <div class="card">
-          <h3>4 · Design arquitetural</h3>
-          <p>Mapear papéis para tipos de agente e definir as performativas FIPA de cada protocolo. O <code>docs/03-interacoes-fipa.md</code> serve de ponto de partida.</p>
+          <h3>Fatia 4</h3>
+          <p>Imprevistos (cancelamento, falha de zona, ausência de operador), métricas e cenários S1–S4.</p>
         </div>
+      </div>
+      <div class="callout warn">
+        <p>Com as decisões fechadas e a tabela de parâmetros, a Fatia 1 já cabe na aula. O <code>v0/</code> serve de consulta para ver como se usa o SPADE (comportamentos, templates de mensagem), mas o v1 é escrito pelo grupo.</p>
       </div>
     </section>
 
-    <footer>Food Rescue Descentralizado · SPADE · guia do v1 · fonte: Food Rescue - Gaia.docx</footer>
+    <footer>Food Rescue Descentralizado · SPADE · guia do v1 (revisão do armazém) · fonte: Food Rescue - Gaia.docx e conversa com o professor</footer>
   </main>
 </div>
 

@@ -2,7 +2,7 @@
 
 > Ponte entre o **modelo de interações preliminar** do Gaia (análise §2.4) e o
 > **modelo de interações completo** do design arquitetural. Aqui decidimos
-> **como** os protocolos P1–P14 vão ser falados: que mensagens, com que
+> **como** os protocolos P1–P7 vão ser falados: que mensagens, com que
 > *performatives* e segundo que protocolo FIPA.
 >
 > Fontes: slides *4. Multi-Agent Systems* (ISIA 2025/26), especificações FIPA
@@ -34,7 +34,7 @@ Cada ato de fala tem três aspetos (slide 8):
 |---|---|---|
 | **Locução** | As palavras ditas | "Tenho 12 kg de pão até às 22h. Quem quer?" |
 | **Ilocução** | A intenção de quem fala | O doador **pede propostas** (*call for proposals*) |
-| **Perlocução** | O efeito real em quem ouve | Um recetor decide responder com uma proposta. **Depende da autonomia do recetor** |
+| **Perlocução** | O efeito real em quem ouve | Um receptor decide responder com uma proposta. **Depende da autonomia do receptor** |
 
 E cada ato divide-se em duas partes:
 - **Performative**: o *verbo* que diz o tipo de ato (informar, pedir, propor…);
@@ -42,9 +42,9 @@ E cada ato divide-se em duas partes:
 
 **Porque é que isto importa em agentes** (slide 6): um objeto não pode recusar
 `o1.m1()`. Um agente pode. Por isso os agentes não invocam métodos uns dos
-outros: **enviam atos de fala** e o recetor decide o que fazer
+outros: **enviam atos de fala** e o receptor decide o que fazer
 (*"objects do it for free, agents do it for money"*). É exatamente o que
-queremos: um voluntário pode recusar uma recolha, um frigorífico pode recusar
+queremos: um resgatador pode recusar uma recolha, um armazém pode recusar
 um depósito.
 
 ### 3.1.2 FIPA-ACL: a linguagem
@@ -63,21 +63,21 @@ Exemplo no nosso domínio, no formato do slide 11:
 
 ```lisp
 (cfp
-  :sender          donor3@localhost
-  :receiver        (set recipient1@localhost recipient4@localhost)
+  :sender          restaurante3@localhost
+  :receiver        (set ong1@localhost abrigo2@localhost)
   :protocol        fipa-contract-net
-  :conversation-id oferta-donor3-17
+  :conversation-id restaurante3-17
   :reply-by        2026-11-19T18:05:00
   :language        json
   :ontology        food-rescue
-  :content         "{\"item\": {\"id\": \"donor3-17\", \"tipo\": \"padaria\",
-                     \"kg\": 12, \"classe\": \"ambiente\",
-                     \"validade\": \"22:00\", \"posicao\": [2, 1]}}")
+  :content         "{\"lote\": {\"id\": \"restaurante3-17\", \"categoria\": \"seco\",
+                     \"kg\": 12, \"validade_min\": 4320,
+                     \"origem\": [2, 1]}}")
 ```
 
 **Ontologia** (slides 16–18): é o vocabulário partilhado. Se o doador diz
-`"classe": "refrigerado"`, o voluntário tem de saber o que isso implica
-(precisa de frio, no máximo 60 min fora). A nossa ontologia `food-rescue` está
+`"categoria": "refrigerado"`, o resgatador tem de saber o que isso implica
+(precisa de caixa térmica, no máximo 60 min fora do frio). A nossa ontologia `food-rescue` está
 na §3.6.
 
 ### 3.1.3 *Performatives* que vamos usar
@@ -86,15 +86,15 @@ A biblioteca FIPA tem cerca de 20 *performatives*. Usamos estas:
 
 | Performative | Significado (intenção de quem envia) | Onde usamos |
 |---|---|---|
-| `cfp` | "Quem quer / quem consegue fazer isto? Mandem propostas" | Anunciar excedente, pedir transporte |
-| `propose` | "Faço isto nestas condições" | Recetor pede o item; voluntário oferece-se; entrega |
-| `refuse` | "Não faço" | Recetor sem necessidade, voluntário ocupado, frigorífico cheio |
-| `accept-proposal` | "Aceito a tua proposta" (o proponente fica **comprometido**) | Escolha do recetor ou do voluntário; aceitação de uma entrega |
+| `cfp` | "Quem quer / quem consegue fazer isto? Mandem propostas" | Anunciar oferta, pedir transporte, distribuir tarefas aos operadores |
+| `propose` | "Faço isto nestas condições" | Receptor ou armazém aceita o lote; resgatador oferece-se; operador aceita a tarefa |
+| `refuse` | "Não faço" | Receptor sem necessidade, resgatador ocupado ou sem caixa térmica, zona do armazém cheia ou avariada |
+| `accept-proposal` | "Aceito a tua proposta" (o proponente fica **comprometido**) | Escolha do receptor ou do resgatador; aceitação de uma entrega |
 | `reject-proposal` | "Não aceito a tua proposta" | Os restantes candidatos; entrega reprovada na inspeção |
-| `request` | "Peço-te que faças X" | Pedir depósito num frigorífico |
-| `agree` | "Comprometo-me a fazer X" | Frigorífico reserva espaço |
+| `request` | "Peço-te que faças X" | (Opcional) pedir uma tarefa a um operador |
+| `agree` | "Comprometo-me a fazer X" | Operador compromete-se com a tarefa |
 | `inform` | "Fica a saber que P é verdade" | Entrega concluída, resultado de inspeção |
-| `failure` | "Tentei e falhei" | Voluntário desiste depois de aceitar |
+| `failure` | "Tentei e falhei" | Resgatador desiste depois de aceitar |
 | `cancel` | "Já não estou interessado nesta conversa" | Doador cancela a oferta |
 | `query-ref` | "Diz-me o valor de X" | (Opcional) pedir reputação a um vizinho |
 | `not-understood` | "Não percebi a tua mensagem" | Qualquer altura (mensagem mal formada) |
@@ -109,13 +109,13 @@ da cadeira define estes protocolos:
 
 | Protocolo FIPA | Em uma frase | Usamos? | Porquê |
 |---|---|---|---|
-| **Request** | A pede a B que faça uma ação; B concorda ou recusa e depois informa o resultado | ✅ | Depósito no frigorífico (1 para 1, sem concorrência) |
-| **Query** | A pergunta algo a B (`query-if` / `query-ref`) | ✅ opcional | Partilha de reputação (P14) |
-| **Request-When** | A pede a B que faça algo **quando** uma condição se verificar | ⚠️ talvez | Ex.: "avisa-me quando o frigorífico tiver espaço" |
-| **Contract Net** | Um gestor anuncia uma tarefa, vários respondem com propostas, o gestor escolhe | ✅ **central** | Escolher recetor **e** escolher voluntário, sem despachante |
+| **Request** | A pede a B que faça uma ação; B concorda ou recusa e depois informa o resultado | ✅ | Opcional: tarefa interna ao armazém, sem concorrência |
+| **Query** | A pergunta algo a B (`query-if` / `query-ref`) | ✅ opcional | Fora do v1 (a reputação é local; não há troca de testemunhos) |
+| **Request-When** | A pede a B que faça algo **quando** uma condição se verificar | ⚠️ talvez | Ex.: "avisa-me quando a zona refrigerada tiver espaço" |
+| **Contract Net** | Um gestor anuncia uma tarefa, vários respondem com propostas, o gestor escolhe | ✅ **central** | Escolher receptor **e** escolher resgatador, sem despachante |
 | **Iterated Contract Net** | Contract Net com várias rondas de licitação | ⚠️ extensão | Se ninguém servir à 1.ª ronda, relançar com condições revistas |
 | **Propose** | A propõe fazer algo; B aceita ou rejeita | ✅ | Passagem de mão na entrega (com inspeção) |
-| **Subscribe** | A subscreve alterações de algo em B | ⚠️ alternativa | Recetor subscreve as ofertas de doadores vizinhos |
+| **Subscribe** | A subscreve alterações de algo em B | ⚠️ alternativa | Receptor subscreve as ofertas de doadores vizinhos |
 | **Brokering / Recruiting** | Um intermediário encontra quem responde por nós | ❌ | Seria um **intermediário central** e violaria a regra OS1 (RNF01) |
 | **English / Dutch Auction** | Leilões de preço a subir ou a descer | ❌ | Não há preço; o critério é urgência, validade e equidade |
 
@@ -159,7 +159,7 @@ sequenceDiagram
    sempre por quem nunca responde. Uma proposta tardia é rejeitada
    automaticamente. É assim que lidamos com **mensagens perdidas** (S3).
 3. **A proposta é vinculativa.** Depois do `accept-proposal`, o participante
-   fica **comprometido**. Por isso um voluntário que desiste tem de enviar
+   fica **comprometido**. Por isso um resgatador que desiste tem de enviar
    `failure`, e isso alimenta a reputação.
 4. **O gestor otimiza uma função** (no nosso caso não é preço: é urgência ×
    quantidade ÷ recebido, ou tempo de entrega ÷ reputação).
@@ -167,7 +167,7 @@ sequenceDiagram
    levam. No SPADE corresponde ao campo `thread` da `Message`.
 
 **Porque é que o Contract Net serve o "sem despachante central":** quem lança
-o CNP é **quem tem o item**. Cada doador é gestor das *suas* ofertas. Há tantos
+o CNP é **quem tem o lote**. Cada doador (e o armazém, ao oferecer estoque) é gestor das *suas* ofertas. Há tantos
 "gestores" quantos itens, e cada um só fala com os vizinhos (regra OS1). A
 coordenação **emerge** de muitos leilões locais.
 
@@ -175,24 +175,31 @@ coordenação **emerge** de muitos leilões locais.
 
 ## 3.4 Mapeamento: protocolos Gaia → protocolos FIPA
 
-Proposta de design ⚠️: **o DOADOR desempenha os papéis EMPARELHADOR e
-ORGANIZADOR DE TRANSPORTE para os seus próprios itens** (o mesmo vale para o
-ARMAZENADOR quando volta a oferecer stock). Com esta escolha:
+Proposta de design ⚠️: **quem tem o lote é o gestor dos seus Contract Nets**.
+O DOADOR desempenha os papéis EMPARELHADOR e ORGANIZADOR DE TRANSPORTE para os
+seus próprios lotes, e o ARMAZENADOR faz o mesmo quando volta a oferecer
+estoque. O armazém **não decide por ninguém**: responde a ofertas e oferece o
+que é seu. Com esta escolha, são 7 protocolos (análise §2.4):
 
 | Gaia (análise §2.4) | Protocolo FIPA | Iniciador → Participante(s) | Sequência de *performatives* |
 |---|---|---|---|
-| P1 AnunciarExcedente + P3 AtribuirDestino | **Contract Net** `offer-cnp` | Doador → recetores vizinhos | cfp → propose\|refuse → accept-proposal / reject-proposal |
-| P2 DeclararNecessidade | *(absorvido)* | — | A necessidade vai **dentro** do `propose` do recetor. Alternativa ⚠️: **Subscribe** |
-| P4 PedirDepósito | **Request** `deposit` | Doador → frigorífico | request → agree\|refuse |
-| P5 ConfirmarDestino | *(interno)* | — | Deixa de ser mensagem: o doador é o próprio EMPARELHADOR |
-| P6 PedirTransporte + P7 ConfirmarTransporte | **Contract Net** `transport-cnp` | Doador → voluntários vizinhos | cfp → propose\|refuse → accept / reject |
-| P10 ConfirmarEntrega | (fim do Contract Net) | Voluntário → doador | inform-done |
-| P11 DesistirTransporte | (fim do Contract Net) | Voluntário → doador | failure → o doador lança **novo** `transport-cnp` (regra OL2) |
-| P8 EntregarNaRecolha | **Request** | Voluntário → doador | request(levantar item) → agree + inform(estado do item) |
-| P9 EntregarItem | **Propose** `delivery` | Voluntário → recetor/frigorífico | propose(item, tempo fora do frio) → accept-proposal\|reject-proposal(motivo) |
-| P12 CancelarOferta | **Cancel meta-protocol** | Doador → quem tem reserva | cancel → inform-done\|failure |
-| P13 ReportarInspeção | **inform** simples | Verificador → avaliador / doador | inform(resultado) |
-| P14 PartilharReputação | **Query** | Avaliador → avaliador vizinho | query-ref → inform-result\|refuse |
+| P1 AnunciarNecessidade | **Inform** (ou **Subscribe** ⚠️) | Receptor → doadores e armazém que conhece | inform(necessidade) |
+| P2 AnunciarOferta | **Contract Net** `oferta` | Doador ou armazém → receptores e armazém | cfp → propose\|refuse → accept-proposal / reject-proposal. Se o destino desistir depois: **cancel** |
+| P3 ContratarResgate | **Contract Net** `resgate` | Doador ou armazém → resgatadores | cfp → propose\|refuse → accept-proposal / reject-proposal → inform(resultado) \| failure |
+| P4 ConfirmarColeta | **Propose** `coleta` | Resgatador → doador ou armazém | propose(kg, temperatura medidos) → accept-proposal \| reject-proposal(divergência) |
+| P5 EntregarLote | **Propose** `entrega` | Resgatador → receptor ou armazém | inform/propose(lote, kg, temperatura) → accept-proposal \| reject-proposal(motivo) |
+| P6 DistribuirTarefas | **Contract Net** `tarefa` (ou **Request**) | Armazém → operadores | cfp(tarefa) → propose\|refuse → accept-proposal → inform(concluída) \| failure |
+| P7 TratarImprevisto | **Cancel** + novo CNP | quem deteta → partes afetadas | cancel \| failure → o gestor reabre `resgate` ou `oferta` (regra OL2) |
+
+> **Na Fatia 1 do código** ([`../v1/src/`](../v1/src/)) já estão implementados P2, P3
+> e P5 (com `inform` na entrega) e o `cancel` do P2. Ver `v1/src/README.md`.
+
+**Porque P6 pode ser um Contract Net.** O armazém publica a tarefa, os
+operadores livres "licitam" com a sua aptidão (função, urgência), e o armazém
+escolhe. É o mesmo mecanismo dos outros protocolos, por isso poupa código. A
+alternativa mais simples é o operador *puxar* a tarefa de um quadro (sem
+mensagens por tarefa), mas então P6 deixa de ser uma interação FIPA e passa a
+ser um recurso partilhado (`Tarefa[t]`).
 
 ---
 
@@ -203,76 +210,103 @@ ARMAZENADOR quando volta a oferecer stock). Com esta escolha:
 > a notação: `alt` = escolha exclusiva (o losango ◇ do AUML), `loop` =
 > repetição, `par` = paralelo.
 
-### 3.5.1 Caso feliz: um item do doador até ao recetor
+### 3.5.1 Caso feliz: um lote do doador até ao receptor
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant D as Doador
-    participant R as Recetores vizinhos
-    participant V as Voluntários vizinhos
-    participant RX as Recetor escolhido
+    participant R as Receptores vizinhos
+    participant V as Resgatadores vizinhos
+    participant RX as Receptor escolhido
 
-    Note over D: DetetarExcedente, DescreverItem
-    D->>R: cfp(item) [offer-cnp, reply-by]
-    R-->>D: propose(kg, urgência, recebido) / refuse
-    Note over D: CalcularPrioridade, EscolherDestino
+    Note over D: AvaliarExcedente, LotearEEmbalar
+    D->>R: cfp(lote) [oferta, reply-by]
+    R-->>D: propose(kg, pos) / refuse
+    Note over D: EscolherDestino
     D->>RX: accept-proposal
     D->>R: reject-proposal (restantes)
 
-    D->>V: cfp(origem, destino, kg, frio?, validade) [transport-cnp]
-    V-->>D: propose(tempo estimado, km, frio) / refuse
-    Note over D: SelecionarTransportador (tempo ÷ reputação)
+    D->>V: cfp(lote, destino, pos_destino) [resgate]
+    V-->>D: propose(tempo estimado) / refuse
+    Note over D: SelecionarTransportador (mais rápido, ponderado pela reputação)
     D->>V: accept-proposal (ao escolhido) / reject-proposal (restantes)
 
-    V->>D: request(levantar item)
-    D-->>V: agree + inform(estado do item)
-    Note over V: InspecionarItem na recolha, Deslocar
-    V->>RX: propose(item, tempo fora do frio) [delivery]
-    Note over RX: InspecionarItem na entrega
-    RX-->>V: accept-proposal
-    V-->>D: inform-done
-    Note over D,RX: AtualizarReputação (todos)
+    Note over V: Deslocar, ConfirmarColeta na origem
+    V->>RX: inform(lote, kg, temperatura) [entrega]
+    Note over RX: InspecionarLote
+    RX-->>V: inform(confirmada | recusada)
+    V-->>D: inform(resultado)
+    Note over D,RX: AtualizarReputação (todos, local)
 ```
 
-### 3.5.2 Falhas: voluntário desiste e frigorífico como plano B
+### 3.5.2 Via armazém: depósito, trabalho dos operadores e nova oferta
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant D as Doador
-    participant R as Recetores
-    participant F as Frigorífico
-    participant V1 as Voluntário 1
-    participant V2 as Voluntário 2
+    participant A as Armazém
+    participant O as Operadores
+    participant V as Resgatador
+    participant R as Receptores
 
-    D->>R: cfp(item)
-    R-->>D: refuse (ninguém precisa agora)
-    Note over D: EscolherDestino: validade ainda longa → frigorífico
-    D->>F: request(depositar item) [deposit]
-    alt cheio ou avariado
-        F-->>D: refuse
-        Note over D: tenta o frigorífico seguinte, ou espera e volta a anunciar
+    D->>A: cfp(lote) [oferta]
+    alt zona cheia, avariada ou sem operador previsto
+        A-->>D: refuse(motivo)
     else há espaço
-        F-->>D: agree (reserva kg)
+        A-->>D: propose(zona, kg) (reserva a vaga)
+        D->>A: accept-proposal
     end
+    D->>V: cfp [resgate] ... accept-proposal
+    V->>A: inform(lote, kg, temperatura) [entrega]
+    Note over A: InspecionarLote, cria Tarefa "receber e armazenar"
+    A->>O: cfp(tarefa) [tarefa]
+    O-->>A: propose (o livre, com a função certa, dentro do turno)
+    A->>O: accept-proposal
+    O-->>A: inform(concluída)
+    A-->>V: inform(confirmada)
+    V-->>D: inform(resultado)
 
-    D->>V1: cfp(transporte)
+    Note over A: mais tarde: GerirInventário, o armazém passa a ser Iniciador
+    A->>R: cfp(lote do estoque) [oferta]
+    R-->>A: propose / refuse
+    A->>R: accept-proposal ... (ContratarResgate com o armazém como gestor)
+```
+
+### 3.5.3 Falhas: resgatador desiste e zona avariada
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant D as Doador
+    participant R as Receptores
+    participant V1 as Resgatador 1
+    participant V2 as Resgatador 2
+    participant A as Armazém
+
+    D->>R: cfp(lote)
+    R-->>D: propose
+    D->>R: accept-proposal
+    D->>V1: cfp [resgate]
     V1-->>D: propose
     D->>V1: accept-proposal
     alt desiste e avisa
         V1-->>D: failure("cancelado")
     else não aparece (no-show)
-        Note over D: reply-by expira sem inform-done → DetetarAusência
+        Note over D: reply-by expira sem inform → DetetarAusência
     end
-    Note over D: reputação(V1) desce, regra OL2: realocar
-    D->>V2: cfp(transporte) (nova ronda)
+    Note over D: reputação(V1) desce; regra OL2: realocar
+    D->>V2: cfp [resgate] (nova ronda)
     V2-->>D: propose
     D->>V2: accept-proposal
-    V2->>F: propose(item) [delivery]
-    F-->>V2: accept-proposal
-    V2-->>D: inform-done
-    Note over F: mais tarde, o frigorífico é Iniciador de um novo offer-cnp
+    V2->>R: inform(lote) [entrega]
+    R-->>V2: inform(confirmada)
+    V2-->>D: inform(resultado)
+
+    Note over A: a zona refrigerada avaria (S3): TratarImprevisto
+    A->>R: cfp(estoque refrigerado) [oferta] (de imediato)
+    Note over A: sem destino a tempo → DescartarVencidos
 ```
 
 ---
@@ -283,38 +317,49 @@ Conceitos (o vocabulário partilhado):
 
 | Conceito | Atributos | Valores |
 |---|---|---|
-| `Item` | id, doador, tipo, kg, classe, validade, posição, tempoForaFrio, rótuloOk | tipo ∈ {padaria, fruta-legumes, prato-pronto, lacticínio}; classe ∈ {ambiente, refrigerado} |
-| `Necessidade` | tiposAceites, kgPretendidos, urgência, recebidoHoje | urgência ∈ {1, 2, 3} |
-| `Transporte` | origem, destino, kg, precisaFrio, prazo | — |
-| `PropostaTransporte` | tempoEstimado, km, temFrio | — |
-| `Inspeção` | itemId, resultado, motivo | resultado ∈ {ok, expirado, frio, rótulo} |
+| `Lote` | id, doador, categoria, kg, validade (min), origem, janela, tempoForaFrio, estado | categoria ∈ {seco, refrigerado, congelado} |
+| `Necessidade` | categoriasAceites, kgPretendidos, janela | — |
+| `Zona` | tipo, capacidadeKg, ocupadoKg, temperatura, estado | tipo = categoria; estado ∈ {ok, avariada} |
+| `Tarefa` | id, tipo, lote, duração, prazo | tipo ∈ {receber, controlar, preparar} |
+| `PropostaTransporte` | tempoMin, riscoFrio | — |
+| `Inspeção` | loteId, resultado, motivo | resultado ∈ {ok, expirado, frio, rótulo, kg} |
 
-Esquemas de conteúdo (JSON, `:language json`):
+Esquemas de conteúdo (JSON, `:language json`). Os nomes de campo seguem os do
+código em `v1/src/` (Fatia 1); onde ainda não há código, é a proposta.
 
 ```jsonc
-// offer-cnp · cfp  (Doador → Recetores)
-{ "round": "R1", "item": { "id": "donor3-17", "tipo": "padaria", "kg": 12,
-  "classe": "ambiente", "validade": 840, "posicao": [2, 1] } }
+// oferta · cfp  (Doador ou Armazém → Receptores e Armazém)
+{ "lote": { "id": "restaurante1-L2", "doador": "restaurante1@localhost",
+            "categoria": "refrigerado", "kg": 15, "validade_min": 360,
+            "origem": [2, 3] } }
 
-// offer-cnp · propose  (Recetor → Doador)
-{ "round": "R1", "kgPretendidos": 12, "urgencia": 3, "recebidoHoje": 40.5,
-  "posicao": [4, 3] }
+// oferta · propose  (Receptor → quem ofereceu). O armazém acrescenta a zona.
+{ "kg": 15, "pos": [8, 7] }                    // armazém: { "kg": 15, "zona": "refrigerado" }
 
-// transport-cnp · cfp  (Doador → Voluntários)
-{ "round": "T1", "item": { "...": "..." }, "destino": "recipient4@localhost",
-  "posDestino": [4, 3] }
+// oferta · refuse
+{ "motivo": "não preciso" }
 
-// transport-cnp · propose  (Voluntário → Doador)
-{ "round": "T1", "tempoEstimado": 38.5, "km": 9, "temFrio": false }
+// resgate · cfp  (quem tem o lote → Resgatadores)
+{ "lote": { "...": "..." }, "destino": "ong1@localhost", "pos_destino": [8, 7] }
 
-// transport-cnp · failure  (Voluntário → Doador)
-{ "round": "T1", "motivo": "cancelado" }
+// resgate · propose  (Resgatador)
+{ "tempo_min": 40.0 }                          // futuro: + "risco_frio"
 
-// delivery · propose  (Voluntário → Recetor)
-{ "item": { "...": "..." }, "tempoForaFrio": 25, "voluntario": "rescuer7@localhost" }
+// resgate · refuse | failure
+{ "motivo": "sem caixa térmica" }              // ou "ocupado", "acima da capacidade"
 
-// delivery · reject-proposal  (Recetor → Voluntário)
-{ "itemId": "donor3-17", "motivo": "expirado" }
+// entrega · inform  (Resgatador → Receptor ou Armazém)
+{ "lote": { "...": "..." }, "temperatura_c": 3 }
+
+// entrega · inform  (resposta)
+{ "resultado": "confirmada" }                  // ou { "resultado": "recusada", "motivo": "..." }
+
+// resgate · inform  (Resgatador → quem ofereceu; fecha o Contract Net)
+{ "resultado": "confirmada" }
+
+// tarefa · cfp  (Armazém → Operadores)   [Fatia 3]
+{ "tarefa": { "id": "T7", "tipo": "receber", "lote": "restaurante1-L2",
+              "duracao_min": 10, "prazo_min": 30 } }
 ```
 
 ---
@@ -324,7 +369,7 @@ Esquemas de conteúdo (JSON, `:language json`):
 | Parâmetro FIPA-ACL | SPADE (`spade.message.Message`) |
 |---|---|
 | performative | `msg.set_metadata("performative", "cfp")` |
-| `:sender` / `:receiver` | `msg.sender` / `msg.to` (JIDs, ex.: `donor3@localhost`) |
+| `:sender` / `:receiver` | `msg.sender` / `msg.to` (JIDs, ex.: `restaurante3@localhost`) |
 | `:conversation-id` | `msg.thread` |
 | `:protocol` | `msg.set_metadata("protocol", "fipa-contract-net")` |
 | `:ontology` | `msg.set_metadata("ontology", "food-rescue")` |
@@ -347,17 +392,27 @@ implementar com comportamentos: `OneShotBehaviour`, ou uma
 `FSMBehaviour` (máquina de estados), para o Iniciador, e uma
 `CyclicBehaviour` para os Participantes.
 
+**Como está na Fatia 1** ([`../v1/src/mensagens.py`](../v1/src/mensagens.py)). Os
+metadados usam nomes simples: `protocolo` (`oferta`, `resgate`, `entrega`),
+`lote` (o `conversation-id`), `ontologia` e uma **`fase`** (`pedido` ou
+`resposta`). A `fase` existe porque o SPADE entrega cada mensagem a **todos** os
+comportamentos cujo `Template` combina; com ela, a *Inbox* geral de cada agente
+só vê pedidos e o comportamento que gere um lote só vê as respostas desse lote.
+O `reply-by` é o parâmetro `prazo_s` de `esperar_respostas`.
+
 ---
 
 ## 3.8 Decisões em aberto ⚠️
 
 | # | Questão | Proposta | Alternativa |
 |---|---|---|---|
-| I1 | Quem é gestor dos Contract Nets | O doador, para os seus itens | O recetor lança CNP para pedir alimento |
-| I2 | DeclararNecessidade | Dentro do `propose` | Subscribe (o recetor subscreve doadores vizinhos) |
-| I3 | Uma ou várias rondas | Contract Net simples, relançado se falhar | Iterated Contract Net |
-| I4 | Duração do `reply-by` | ~0,5 s reais (10 min simulados) | Adaptativa à urgência do item |
-| I5 | Vizinhança (quem recebe o `cfp`) | Raio fixo em km | Os *k* mais próximos |
+| I1 | Quem é gestor dos Contract Nets | Quem tem o lote: o doador, ou o armazém ao oferecer estoque | O receptor lança CNP para pedir alimento |
+| I2 | AnunciarNecessidade | Mensagem `inform` periódica aos que conhece | Subscribe (o receptor subscreve doadores vizinhos) |
+| I3 | Uma ou várias rondas | Contract Net simples, relançado se falhar (regra OL2) | Iterated Contract Net |
+| I4 | Duração do `reply-by` | ~3 s reais por ronda (na Fatia 1, `PRAZO_RESPOSTAS_S`) | Adaptativa à urgência do lote |
+| I5 | Vizinhança (quem recebe o `cfp`) | Todos os conhecidos na Fatia 1; depois raio fixo em km | Os *k* mais próximos |
+| I6 | P6 DistribuirTarefas | Contract Net (reaproveita código) | Operador puxa de um quadro partilhado |
+| I7 | Do armazém ao receptor | Resgatador, via `resgate` com o armazém como gestor | O receptor retira por conta própria |
 
 ## Referências
 
