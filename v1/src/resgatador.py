@@ -19,9 +19,13 @@ from . import mensagens as M
 from .config import PRAZO_RESPOSTAS_S, distancia
 from .registo import registar
 
-TEMPO_DE_MANUSEIO_MIN = 5       # minutos para carregar ou descarregar
-TEMPERATURA_COM_CAIXA_C = 3     # temperatura do lote se tiver caixa térmica
-TEMPERATURA_SEM_CAIXA_C = 12    # (usada a partir da Fatia 2, para a cadeia de frio)
+
+TEMPO_DE_MANUSEIO_MIN = 5          # minutos para carregar ou descarregar
+
+TEMPERATURA_REFRIGERADO_C = 3      # temperatura simulada para alimentos refrigerados
+TEMPERATURA_CONGELADO_C = -18      # temperatura simulada para alimentos congelados
+TEMPERATURA_SEM_CAIXA_C = 12       # temperatura simulada sem caixa térmica
+
 
 
 class ResgatadorAgent(Agent):
@@ -117,7 +121,15 @@ class ResgatadorAgent(Agent):
                 a.pos = tuple(pos_destino)
 
                 # 3) EntregarLote: dizemos o que trazemos; a ONG inspeciona e responde
-                temperatura = TEMPERATURA_COM_CAIXA_C if a.caixa_termica else TEMPERATURA_SEM_CAIXA_C
+                
+                # Determinar a temperatura simulada conforme a categoria do lote.
+                if not a.caixa_termica:
+                    temperatura = TEMPERATURA_SEM_CAIXA_C
+                elif lote["categoria"] == "congelado":
+                    temperatura = TEMPERATURA_CONGELADO_C
+                else:
+                    temperatura = TEMPERATURA_REFRIGERADO_C
+
                 await self.send(M.criar(destino, "inform", "entrega", lote_id,
                                         {"lote": lote, "temperatura_c": temperatura}))
                 resposta = await M.esperar_respostas(self, "entrega", 1, PRAZO_RESPOSTAS_S)
