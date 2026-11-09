@@ -26,15 +26,36 @@ def registar(agente: str, evento: str, lote: str = "", **dados) -> None:
     print(f"[{t:6.2f}s] {agente:<13} {evento:<22} {lote:<16} {detalhe}", flush=True)
 
 
+
 def resumo(lotes_gerados: list[dict]) -> dict:
-    """Resumo simples no fim da corrida."""
-    entregues = [e for e in EVENTOS if e["evento"] == "lote_entregue"]
+    """Distingue entregas a ONGs de lotes guardados em armazém."""
+
+    entregas = [
+        e for e in EVENTOS
+        if e["evento"] == "lote_entregue"
+        and e.get("resultado") == "confirmada"
+    ]
+
     kg_gerados = sum(l["kg"] for l in lotes_gerados)
-    kg_entregues = sum(e.get("kg", 0) for e in entregues)
+    kg_ongs = sum(
+        e["kg"] for e in entregas if e.get("tipo_destino") == "ong"
+    )
+    kg_armazens = sum(
+        e["kg"] for e in entregas if e.get("tipo_destino") == "armazem"
+    )
+    kg_entregues = kg_ongs + kg_armazens
+
     return {
         "lotes_gerados": len(lotes_gerados),
-        "lotes_entregues": len(entregues),
+        "lotes_entregues": len({e["lote"] for e in entregas}),
+        "entregas_confirmadas": len(entregas),
         "kg_gerados": kg_gerados,
         "kg_entregues": kg_entregues,
-        "taxa_de_resgate": round(kg_entregues / kg_gerados, 2) if kg_gerados else 0,
+        "kg_ongs": kg_ongs,
+        "kg_armazens": kg_armazens,
+        "kg_sem_entrega": round(kg_gerados - kg_entregues, 2),
+        "taxa_de_resgate": round(kg_entregues / kg_gerados, 2)
+                           if kg_gerados else 0,
+        "taxa_entrega_direta_ongs": round(kg_ongs / kg_gerados, 2)
+                                   if kg_gerados else 0,
     }

@@ -47,7 +47,7 @@ def escolher_resgatador(propostas: list[dict]) -> dict | None:
 
 # =============================================================================
 class RestauranteAgent(Agent):
-    def __init__(self, jid, senha, pos, ongs, resgatadores, lotes, ao_terminar):
+    def __init__(self, jid, senha, pos, ongs, resgatadores, lotes, ao_terminar, armazens):
         """
         ongs         : lista de (jid, pos) das ONGs que este restaurante conhece
         resgatadores : lista de jids dos resgatadores que conhece
@@ -62,6 +62,7 @@ class RestauranteAgent(Agent):
         self.ao_terminar = ao_terminar
         self.nome = str(jid).split("@")[0]
         self.lotes_pendentes = len(lotes)
+        self.armazens = armazens
 
     async def setup(self):
         self.add_behaviour(self.GerarLotes())
@@ -97,75 +98,152 @@ class RestauranteAgent(Agent):
                 if self.agent.lotes_pendentes == 0:
                     self.agent.ao_terminar()
 
+        
         async def conduzir(self):
+            """Oferece primeiro às ONGs; o excedente segue para o armazém."""
             a, lote = self.agent, self.lote
+            kg_restantes = lote["kg"]
 
-            # ---------- 1. AnunciarOferta ----------------------------------
-            # cfp = "call for proposals": quem quer este lote?
+            # ---- 1. Negociar primeiro com as ONGs -------------------------
             for jid, _ in a.ongs:
                 await self.send(M.criar(jid, "cfp", "oferta", lote["id"], {"lote": lote}))
-            respostas = await M.esperar_respostas(self, "oferta", len(a.ongs), PRAZO_RESPOSTAS_S)
 
+            respostas = await M.esperar_respostas(
+                self, "oferta", len(a.ongs), PRAZO_RESPOSTAS_S
+            )
             propostas = []
             for r in respostas:
                 if M.performativa(r) == "propose":
                     c = M.conteudo(r)
-                    propostas.append({"jid": M.quem(r), "kg": c["kg"],
-                                      "distancia": distancia(a.pos, tuple(c["pos"]))})
-            destino = escolher_destino(propostas)
+                    propostas.append({
+                        "jid": M.quem(r), "kg": c["kg"],
+                        "distancia": distancia(a.pos, tuple(c["pos"]))
+                    })
 
-            # Avisa todos: quem ganhou recebe accept, os outros reject (libertam a reserva).
+            destino_ong = escolher_destino(propostas)
             for p in propostas:
-                perf = "accept-proposal" if p is destino else "reject-proposal"
+                perf = "accept-proposal" if p is destino_ong else "reject-proposal"
                 await self.send(M.criar(p["jid"], perf, "oferta", lote["id"], {}))
 
-            if destino is None:
-                registar(a.nome, "sem_destino", lote["id"], motivo="nenhuma ONG quis")
-                return
-            registar(a.nome, "destino_escolhido", lote["id"], destino=destino["jid"], kg=destino["kg"])
+            if destino_ong is not None:
+                kg_ong = min(destino_ong["kg"], kg_restantes)
+                registar(a.nome, "destino_escolhido", lote["id"],
+                         destino=destino_ong["jid"], kg=kg_ong)
 
-            # ---------- 2. ContratarResgate (Contract Net) -----------------
-            # O lote que vai ser transportado é só a parte que a ONG aceitou.
-            lote_a_levar = {**lote, "kg": destino["kg"]}
+                # A quantidade atribuída à ONG deixa de ser excedente.
+                kg_restantes -= kg_ong
+                await self._transportar(lote, destino_ong, kg_ong, "ong")
+
+            # ---- 2. Oferecer o excedente ao armazém ------------------------
+            if kg_restantes > 0 and a.armazens:
+                # Nesta versão, utilizamos apenas o primeiro armazém.
+                jid_arm, pos_arm = a.armazens[0]
+                lote_excedente = {**lote, "kg": kg_restantes}
+
+                await self.send(M.criar(
+                    jid_arm, "cfp", "oferta", lote["id"], {"lote": lote_excedente}
+                ))
+
+                respostas_arm = await M.esperar_respostas(
+                    self, "oferta", 1, PRAZO_RESPOSTAS_S
+                )
+
+                if respostas_arm:
+                    r = respostas_arm[0]
+                    if M.performativa(r) == "propose" and M.quem(r) == jid_arm:
+                        kg_arm = min(M.conteudo(r)["kg"], kg_restantes)
+
+                        if kg_arm > 0:
+                            destino_arm = {
+                                "jid": jid_arm, "kg": kg_arm,
+                                "distancia": distancia(a.pos, pos_arm)
+                            }
+                            await self.send(M.criar(
+                                jid_arm, "accept-proposal", "oferta", lote["id"], {}
+                            ))
+                            registar(a.nome, "destino_escolhido", lote["id"],
+                                     destino=jid_arm, kg=kg_arm)
+
+                            kg_restantes -= kg_arm
+                            await self._transportar(lote, destino_arm, kg_arm, "armazem")
+                        else:
+                            # Uma proposta de 0 kg não é válida.
+                            await self.send(M.criar(
+                                jid_arm, "reject-proposal", "oferta", lote["id"], {}
+                            ))
+
+            if kg_restantes > 0:
+                registar(a.nome, "sem_destino", lote["id"],
+                         motivo="excedente sem capacidade", kg=kg_restantes)
+
+        async def _transportar(self, lote, destino, kg, tipo_destino):
+            """Contrata um resgatador e aguarda a confirmação de uma entrega."""
+            a = self.agent
+            lote_a_levar = {**lote, "kg": kg}
+
+            # ---- 3. Pedir propostas aos resgatadores -----------------------
             for jid in a.resgatadores:
-                await self.send(M.criar(jid, "cfp", "resgate", lote["id"],
-                                        {"lote": lote_a_levar, "destino": destino["jid"],
-                                         "pos_destino": list(self._pos_ong(destino["jid"]))}))
-            respostas = await M.esperar_respostas(self, "resgate", len(a.resgatadores), PRAZO_RESPOSTAS_S)
+                await self.send(M.criar(
+                    jid, "cfp", "resgate", lote["id"],
+                    {"lote": lote_a_levar, "destino": destino["jid"],
+                     "pos_destino": list(self._pos_destino(destino["jid"]))}
+                ))
 
-            propostas = [{"jid": M.quem(r), "tempo_min": M.conteudo(r)["tempo_min"]}
-                         for r in respostas if M.performativa(r) == "propose"]
+            respostas = await M.esperar_respostas(
+                self, "resgate", len(a.resgatadores), PRAZO_RESPOSTAS_S
+            )
+            propostas = [
+                {"jid": M.quem(r), "tempo_min": M.conteudo(r)["tempo_min"]}
+                for r in respostas if M.performativa(r) == "propose"
+            ]
             escolhido = escolher_resgatador(propostas)
+
             for p in propostas:
                 perf = "accept-proposal" if p is escolhido else "reject-proposal"
                 await self.send(M.criar(p["jid"], perf, "resgate", lote["id"], {}))
 
             if escolhido is None:
-                registar(a.nome, "sem_resgatador", lote["id"], motivo="ninguém pôde levar")
+                registar(a.nome, "sem_resgatador", lote["id"],
+                         motivo="ninguém pôde levar", kg=kg)
                 await self._cancelar_oferta(destino["jid"], lote["id"])
-                return
-            registar(a.nome, "resgatador_escolhido", lote["id"],
-                     resgatador=escolhido["jid"], tempo_min=escolhido["tempo_min"])
+                return False
 
-            # ---------- 3. Esperar o resultado -----------------------------
-            # O resgatador responde com inform (entregue) ou failure (desistiu).
-            # Se nada chegar até ao prazo, consideramos que ele não apareceu.
-            # (Na Fatia 4 é aqui que se reabre o ContratarResgate, regra OL2.)
+            registar(a.nome, "resgatador_escolhido", lote["id"],
+                     resgatador=escolhido["jid"],
+                     tempo_min=escolhido["tempo_min"])
+
+            # ---- 4. Esperar a confirmação da entrega ----------------------
             prazo = escolhido["tempo_min"] * ESCALA_S * 3 + PRAZO_RESPOSTAS_S
-            fim = await M.esperar_respostas(self, "resgate", 1, prazo,
-                                            performativas={"inform", "failure"})
+            fim = await M.esperar_respostas(
+                self, "resgate", 1, prazo,
+                performativas={"inform", "failure"}
+            )
+
             if fim and M.performativa(fim[0]) == "inform":
-                registar(a.nome, "lote_entregue", lote["id"], kg=lote_a_levar["kg"],
-                         destino=destino["jid"], resultado=M.conteudo(fim[0]).get("resultado"))
-            else:
-                registar(a.nome, "entrega_falhou", lote["id"],
-                         motivo="failure" if fim else "sem resposta (no-show?)")
-                await self._cancelar_oferta(destino["jid"], lote["id"])
-                # Fatia 4: em vez de desistir, reabrir ContratarResgate (regra OL2).
+                resultado = M.conteudo(fim[0]).get("resultado")
+                if resultado == "confirmada":
+                    registar(a.nome, "lote_entregue", lote["id"], kg=kg,
+                             destino=destino["jid"], tipo_destino=tipo_destino,
+                             resultado=resultado)
+                    return True
+
+            motivo = "entrega recusada ou falhada" if fim else "sem resposta"
+            registar(a.nome, "entrega_falhou", lote["id"],
+                     motivo=motivo, kg=kg)
+            await self._cancelar_oferta(destino["jid"], lote["id"])
+            return False
+
 
         async def _cancelar_oferta(self, jid_ong: str, lote_id: str):
             """CancelarOferta: a ONG liberta os kg que tinha reservado para este lote."""
             await self.send(M.criar(jid_ong, "cancel", "oferta", lote_id, {}))
 
-        def _pos_ong(self, jid: str):
-            return next(pos for j, pos in self.agent.ongs if j == jid)
+        
+        def _pos_destino(self, jid: str):
+            """Devolve a posição de uma ONG ou de um armazém conhecido."""
+
+            # Procurar o destino entre todas as ONGs e armazéns conhecidos.
+            destinos = self.agent.ongs + self.agent.armazens
+
+            return next(pos for j, pos in destinos if j == jid)
+

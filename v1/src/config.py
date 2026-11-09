@@ -44,7 +44,7 @@ RESGATADORES = [
 
 ONGS = [
     {"nome": "ong1", "pos": (8, 7), "categorias": {"seco", "refrigerado"},
-     "necessidade_kg": 40},
+     "necessidade_kg": 30},
 ]
 
 # Lotes que o restaurante gera (um de cada vez, com pausa entre eles).
@@ -57,4 +57,17 @@ LOTES = [
 ]
 # Com 1 só resgatador, um lote novo enquanto ele ainda está na estrada recebe
 # "ocupado" e o restaurante cancela a oferta. Baixem para 1.0 para ver isso.
-PAUSA_ENTRE_LOTES_S = 4.0
+PAUSA_ENTRE_LOTES_S = 7.0
+
+
+# Armazém passivo: recebe os lotes, ou partes de lotes, que as ONGs não
+# conseguem aceitar. Tem três zonas de armazenamento, uma por categoria
+# alimentar, cada uma com uma capacidade máxima definida em kg.
+# A ocupação e as reservas de cada zona são geridas pelo agente durante
+# a simulação; aqui definimos apenas as capacidades iniciais.
+
+ARMAZENS = [
+    {"nome": "armazem1", "pos": (6, 6),
+     "zonas": {"seco": 500, "refrigerado": 200, "congelado": 100}},
+]
+

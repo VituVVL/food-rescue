@@ -29,6 +29,7 @@ from . import registo
 from .ong import OngAgent
 from .restaurante import RestauranteAgent
 from .resgatador import ResgatadorAgent
+from .armazem import ArmazemAgent
 
 TEMPO_MAXIMO_S = 60     # se algo ficar preso, a corrida acaba ao fim disto
 
@@ -51,16 +52,29 @@ async def main():
                                     d["caixa_termica"], d["velocidade_km_min"])
                     for d in C.RESGATADORES]
 
+    
+    # Cada armazém recebe a sua localização e as capacidades das zonas.
+    armazens = [
+        ArmazemAgent(jid(d["nome"]), C.SENHA, d["pos"], d["zonas"])
+        for d in C.ARMAZENS
+    ]
+
+
     # Cada restaurante só conhece os pares que lhe passamos aqui (sem diretório
     # central). Na Fatia 1 conhecem todos; depois pode limitar-se por raio.
     ongs_conhecidas = [(str(o.jid), o.pos) for o in ongs]
-    resgatadores_conhecidos = [str(r.jid) for r in resgatadores]
+    resgatadores_conhecidos = [str(r.jid) for r in resgatadores]#
+    # Armazéns conhecidos pelos restaurantes (identificador e localização).
+    armazens_conhecidos = [(str(a.jid), a.pos) for a in armazens]
+    
     restaurantes = [RestauranteAgent(jid(d["nome"]), C.SENHA, d["pos"], ongs_conhecidas,
-                                     resgatadores_conhecidos, C.LOTES, terminou.set)
+                                     resgatadores_conhecidos, C.LOTES, terminou.set, armazens_conhecidos)
                     for d in C.RESTAURANTES]
 
+    
+
     # --- arrancar: primeiro quem responde, por fim quem inicia ---------------
-    todos = ongs + resgatadores + restaurantes
+    todos = ongs + armazens + resgatadores + restaurantes
     for a in todos:
         await a.start(auto_register=True)
     print(f"{len(todos)} agentes a correr.\n", flush=True)
