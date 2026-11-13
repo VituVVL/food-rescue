@@ -183,7 +183,12 @@ Estes pressupostos entram diretamente no **modelo de ambiente** (análise §2.2)
 
 O enunciado pede pelo menos 3 cenários contrastantes. S4 é um extra.
 
-## 1.9 Decisões em aberto ⚠️ (fechar na próxima reunião)
+## 1.9 Decisões
+
+> **Fechadas em 13/11/2026.** Linha geral, sugerida pelo professor: primeiro um
+> trabalho **simples, mas completo e coerente**; os detalhes só entram depois de o
+> ecossistema funcionar. D6, D7 e D8 estão fechadas como se descreve abaixo. As
+> outras seguem a proposta.
 
 | # | Questão | Proposta | Alternativa | Porquê a proposta |
 |---|---|---|---|---|
@@ -192,9 +197,9 @@ O enunciado pede pelo menos 3 cenários contrastantes. S4 é um extra.
 | D3 | Tempo | 1 min simulado = 0,05 s reais (dia de 8 h ≈ 30 s) | Tempo real | Permite várias *seeds* por cenário |
 | D4 | Verificação | **Não agentificar**: papel VERIFICADOR desempenhado por quem recebe o lote | Agente Inspetor | Um inspetor central seria um ponto central; ver análise §2.2 |
 | D5 | Limites de RNF02 e RNF04 | 70% e 30 min | Outros valores | Valores de referência para discutir no relatório |
-| D6 | Do armazém ao receptor, quem transporta | Um resgatador, via o mesmo `ContratarResgate` (o armazém faz de doador) | O receptor retira por conta própria | Menos código: reaproveita um protocolo |
-| D7 | Operadores | Agentes que pegam tarefas de um quadro | Só um número de operadores e um tempo por tarefa | Mostra decisão local e cria o gargalo de S2; o *fallback* é a alternativa |
-| D8 | Reputação | Local a cada agente; sem papel Avaliador nem troca de testemunhos | Troca de testemunhos (extra) | Mantém o modelo pequeno |
+| D6 | Do armazém ao receptor, quem transporta | ✅ **Decidido:** um resgatador, via o mesmo `ContratarResgate` (o armazém faz de doador) | O receptor retira por conta própria | Menos código: reaproveita um protocolo |
+| D7 | Operadores | ✅ **Decidido:** não são agentes. OPERADOR é um papel desempenhado pelo agente Armazém, com N operadores internos (cada um com as funções que sabe fazer) e uma duração por tarefa | Agentes que pegam tarefas de um quadro (extra, se houver tempo) | Em Gaia, papel ≠ agente. Mantém o gargalo de S2 sem um protocolo a mais |
+| D8 | Reputação | ✅ **Decidido:** fica, mas local a cada agente; sem troca de testemunhos (o professor citou-a) | Troca de testemunhos (extra) | Mantém o modelo pequeno |
 
 ## 1.10 Rastreabilidade (requisito → análise)
 
@@ -208,7 +213,7 @@ O enunciado pede pelo menos 3 cenários contrastantes. S4 é um extra.
 | RF07 | Protocolo TratarImprevisto; regra OL2 |
 | RF08, RF12 | Papel VERIFICADOR; regras OS3, OS4, OS5 |
 | RF09 | Papel AVALIADOR (conhecimento local `Reputação[self][*]`) |
-| RF13 | Papel OPERADOR; protocolo DistribuirTarefas; recurso `Tarefa[t]` |
+| RF13 | Papel OPERADOR (desempenhado pelo agente Armazém, D7); atividade interna DistribuirTarefas |
 | RNF01 | Regra OS1 |
 | RNF05 | Permissões de RECEPTOR; regra OS7 |
 

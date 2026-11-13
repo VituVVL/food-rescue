@@ -271,7 +271,7 @@
       <li><a href="#interacoes">Modelo de interações</a></li>
       <li><a href="#matriz">Quem participa de quê</a></li>
       <li><a href="#sequencia">A vida de um lote</a></li>
-      <li><a href="#aberto">Decisões em aberto</a></li>
+      <li><a href="#aberto">Decisões fechadas</a></li>
       <li><a href="#codigo">Antes do código</a></li>
     </ol>
   </nav>
@@ -299,7 +299,7 @@
 
     <section id="gaia">
       <h2>Onde estamos no processo Gaia</h2>
-      <p class="sub">Análise quase fechada. Falta decidir os pontos em aberto, escrever as regras organizacionais e passar ao design.</p>
+      <p class="sub">Análise fechada a 13/11 (decisões e regras organizacionais abaixo). O código já cobre as Fatias 1 a 3; falta a Fatia 4.</p>
       <div class="process">
         <div class="stage done"><span class="tag">feito</span><b>0 · Requisitos</b>objetivos e atores</div>
         <div class="stage now"><span class="tag">agora</span><b>1 · Análise</b>ambiente, papéis, interações e regras</div>
@@ -354,7 +354,7 @@
       <div class="callout">
         <p><strong>Por que isto importa para a simulação.</strong> Os operadores limitam a vazão do armazém: se chegam mais lotes do que os operadores conseguem receber dentro do prazo, o lote espera, e um refrigerado esperando fora do frio estraga. É o gargalo que o S2 vai explorar.</p>
       </div>
-      <p><strong>Como os operadores escolhem trabalho (sugestão).</strong> O armazém publica tarefas num quadro; o operador livre pega a mais urgente que sabe fazer. Ninguém atribui: cada um se serve. Fica simples de codificar e continua sem despachante.</p>
+      <p><strong>Como ficou (decisão de 13/11).</strong> Os operadores <em>não</em> são agentes. O papel Operador é desempenhado pelo próprio agente Armazém (em Gaia, papel ≠ agente). Cada operador é um recurso interno com as funções que sabe fazer, e cada tarefa (receber 10 min, controlar 5 min, preparar 15 min) espera até haver um operador livre que a saiba fazer. O gargalo do S2 continua lá. Turnos e operadores como agentes ficam como extra.</p>
     </section>
 
     <section id="papeis">
@@ -435,7 +435,7 @@
 
       <article class="role c-oper">
         <h3>Operador</h3>
-        <p class="desc">Voluntário que trabalha dentro do armazém. Tem funções que sabe fazer e um turno.</p>
+        <p class="desc">Voluntário que trabalha dentro do armazém. Tem funções que sabe fazer. <strong>Desempenhado pelo agente Armazém</strong> (decisão de 13/11): não é um agente à parte.</p>
         <div class="role-grid">
           <div>
             <h4>Protocolos</h4>
@@ -646,32 +646,38 @@
     </section>
 
     <section id="aberto">
-      <h2>Decisões em aberto</h2>
-      <p class="sub">Onde eu escolhi um padrão para avançar. Se o grupo discordar, é fácil mudar agora e caro mudar depois do código.</p>
+      <h2>Decisões fechadas</h2>
+      <p class="sub">Fechadas pelo grupo a 13/11. Linha geral, sugerida pelo professor: primeiro um trabalho simples, mas completo e coerente; os detalhes só entram depois de o ecossistema funcionar.</p>
       <ol class="issues">
         <li>
           <h3>O armazém é um ponto único de falha?</h3>
-          <p>Sim, em parte, e é a tensão com o "sem despachante central" do enunciado. A resposta defensável: o armazém é um <em>serviço de armazenagem</em>, não um coordenador; não decide destinos. E o doador continua a poder oferecer direto aos receptores, então se o armazém falhar a rede ainda funciona. Vale confirmar com o professor que esta leitura serve.</p>
+          <p><strong>Decidido:</strong> o armazém é um <em>serviço de armazenagem</em>, não um coordenador; não decide destinos por ninguém. O restaurante oferece primeiro direto às ONGs, por isso, se o armazém falhar, a rede continua a funcionar. O professor está de acordo.</p>
         </li>
         <li>
           <h3>Do armazém ao receptor: resgatador ou o próprio receptor retira?</h3>
-          <p>Proposta: resgatador, reaproveitando <code>ContratarResgate</code> (o armazém faz o papel do doador). É menos código do que criar um protocolo de retirada. Alternativa mais realista: ONGs buscam sozinhas.</p>
+          <p><strong>Decidido:</strong> resgatador, reaproveitando <code>ContratarResgate</code>. O armazém faz o papel do doador com o mesmo código do restaurante (<code>doador.py</code>).</p>
         </li>
         <li>
           <h3>Operadores são agentes?</h3>
-          <p>Proposta: sim, pegando tarefas de um quadro. Se faltar tempo, o fallback é o armazém ter um <em>número</em> de operadores e um tempo de processamento por tarefa, sem agentes separados.</p>
+          <p><strong>Decidido:</strong> não. O papel Operador é desempenhado pelo agente Armazém, que tem N operadores internos (cada um com as funções que sabe fazer) e uma duração por tarefa. É coerente com Gaia (um agente pode desempenhar vários papéis) e poupa o protocolo <code>DistribuirTarefas</code>, que passa a interno.</p>
         </li>
         <li>
           <h3>Quais zonas?</h3>
-          <p>Proposta: seco, refrigerado e congelado. Congelado pode sair se complicar.</p>
+          <p><strong>Decidido:</strong> seco, refrigerado e congelado (já implementadas).</p>
         </li>
         <li>
           <h3>Reputação</h3>
-          <p>Fica local a cada agente. Sai o papel Avaliador e o protocolo <code>TrocarTestemunho</code>. Se sobrar tempo, volta como extra.</p>
+          <p><strong>Decidido:</strong> fica, porque o professor a citou, mas na versão mais simples: cada agente guarda localmente quantas vezes cada par cumpriu ou falhou e usa isso nas escolhas. Sem papel Avaliador e sem <code>TrocarTestemunho</code>. Entra na Fatia 4, junto com as falhas que a alimentam.</p>
         </li>
         <li>
           <h3>Regras organizacionais</h3>
-          <p>Ainda por escrever: as regras de vivacidade e segurança da organização inteira. Proposta de partida: nenhum lote tem dois destinos nem dois resgatadores; todo lote termina entregue ou descartado; refrigerado nunca passa de L minutos fora do frio; falha de transporte leva sempre a nova tentativa enquanto o lote for seguro.</p>
+          <p><strong>Decidido:</strong> estão escritas em <code>docs/02-analise-gaia.md</code> §2.5 (OL1–OL6, OS1–OS8). Para a primeira versão completa adotamos este subconjunto (§2.5.1):</p>
+          <p>· nenhum lote (ou parte) tem dois destinos nem dois resgatadores (OS2) ✅<br>
+          · ninguém aceita acima da sua capacidade (OS6) ✅<br>
+          · frio partido ou validade expirada nunca é aceite; frio parado mais de L = 60 min na doca é descartado (OS4, OS5) ✅<br>
+          · todo o lote termina entregue, em estoque ou descartado, nunca esquecido (OL1, OL5) ✅<br>
+          · uma falha de transporte leva a nova tentativa enquanto o lote for seguro (OL2) ⏳ Fatia 4<br>
+          · toda a entrega alimenta a reputação local (OL3) ⏳ Fatia 4</p>
         </li>
       </ol>
     </section>
@@ -681,7 +687,7 @@
       <p class="sub">O que falta de estrutural para a aula prática. Nada aqui é longo; o objetivo é ninguém travar na hora de escrever.</p>
 
       <h3>1 · Fechar as decisões acima</h3>
-      <p>Uns 15 minutos de reunião. Se algo ficar sem resposta, vale a proposta.</p>
+      <p>✅ Feito a 13/11.</p>
 
       <h3>2 · Tabela de parâmetros</h3>
       <p>O código precisa de números. Valores de partida, todos para o grupo ajustar:</p>
@@ -690,7 +696,7 @@
           <thead><tr><th>Parâmetro</th><th>Valor inicial</th><th>Usado por</th></tr></thead>
           <tbody>
             <tr><td>Zonas do armazém</td><td>seco 500 kg · refrigerado 200 kg · congelado 100 kg</td><td>Armazém</td></tr>
-            <tr><td>Operadores</td><td>4, com turnos; cada um sabe 1 ou 2 funções</td><td>Operador</td></tr>
+            <tr><td>Operadores</td><td>4, cada um sabe 1 ou 2 funções (turnos ficam como extra)</td><td>Operador</td></tr>
             <tr><td>Duração das tarefas</td><td>receber 10 min · controlar 5 min · preparar 15 min</td><td>Operador</td></tr>
             <tr><td>Tempo mínimo útil</td><td>90 min de validade restante</td><td>Doador</td></tr>
             <tr><td>Limite L fora do frio</td><td>60 min</td><td>Resgatador, Armazém</td></tr>
@@ -718,25 +724,25 @@ EntregarLote        inform         {lote_id, kg, temperatura}
                     inform         {resultado: confirmada|parcial|recusada}</code></pre>
 
       <h3>4 · Papel → agente</h3>
-      <p>Um agente SPADE por entidade: <code>Restaurante</code>, <code>Resgatador</code>, <code>Armazem</code>, <code>Operador</code>, <code>ONG</code> e <code>Abrigo</code> (os dois últimos são o mesmo código com parâmetros diferentes). O <code>Armazem</code> desempenha o papel Armazenador e inicia protocolos como o Doador.</p>
+      <p>Um agente SPADE por entidade: <code>Restaurante</code>, <code>Resgatador</code>, <code>Armazem</code>, <code>ONG</code> e <code>Abrigo</code> (os dois últimos são o mesmo código com parâmetros diferentes). O <code>Armazem</code> desempenha os papéis Armazenador e Operador, e inicia protocolos como o Doador.</p>
 
       <h3>5 · Ordem para programar</h3>
       <div class="two">
         <div class="card">
-          <h3>Fatia 1</h3>
+          <h3>Fatia 1 ✅</h3>
           <p>Um <code>Restaurante</code>, um <code>Resgatador</code> e uma <code>ONG</code>. O restaurante gera um lote, oferece à ONG, contrata o resgatador por Contract Net e o lote é entregue. Tudo com <code>print</code> de cada mensagem. É o que o guia já sugeria: AnunciarOferta + ContratarResgate + EntregarLote.</p>
         </div>
         <div class="card">
-          <h3>Fatia 2</h3>
-          <p>O <code>Armazem</code> passivo: responde às ofertas com aceite ou recusa conforme a capacidade da zona, e recebe lotes. Ainda sem operadores.</p>
+          <h3>Fatia 2 ✅</h3>
+          <p>O <code>Armazem</code> passivo: responde às ofertas com aceite ou recusa conforme a capacidade da zona, e recebe lotes. O restaurante oferece primeiro às ONGs e o excedente ao armazém.</p>
         </div>
         <div class="card">
-          <h3>Fatia 3</h3>
-          <p>O <code>Operador</code> e o quadro de tarefas. O armazém passa a ter tempo de processamento. Depois, o armazém volta a oferecer o estoque.</p>
+          <h3>Fatia 3 ✅</h3>
+          <p>Os operadores (internos ao armazém) e o tempo de processamento: receber, controlar validades e preparar pedidos. O armazém volta a oferecer o estoque às ONGs, incluindo as que o restaurante não alcança.</p>
         </div>
         <div class="card">
-          <h3>Fatia 4</h3>
-          <p>Imprevistos (cancelamento, falha de zona, ausência de operador), métricas e cenários S1–S4.</p>
+          <h3>Fatia 4 ⏳</h3>
+          <p>Imprevistos (resgatador que não aparece e nova tentativa, regra OL2; quebra de frio), reputação local, métricas e cenários S1–S4.</p>
         </div>
       </div>
       <div class="callout warn">

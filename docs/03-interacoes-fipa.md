@@ -188,18 +188,18 @@ que é seu. Com esta escolha, são 7 protocolos (análise §2.4):
 | P3 ContratarResgate | **Contract Net** `resgate` | Doador ou armazém → resgatadores | cfp → propose\|refuse → accept-proposal / reject-proposal → inform(resultado) \| failure |
 | P4 ConfirmarColeta | **Propose** `coleta` | Resgatador → doador ou armazém | propose(kg, temperatura medidos) → accept-proposal \| reject-proposal(divergência) |
 | P5 EntregarLote | **Propose** `entrega` | Resgatador → receptor ou armazém | inform/propose(lote, kg, temperatura) → accept-proposal \| reject-proposal(motivo) |
-| P6 DistribuirTarefas | **Contract Net** `tarefa` (ou **Request**) | Armazém → operadores | cfp(tarefa) → propose\|refuse → accept-proposal → inform(concluída) \| failure |
+| P6 DistribuirTarefas | **Interno** (D7: sem mensagens FIPA) | Armazém → os seus operadores | a tarefa espera por um operador livre com a função certa |
 | P7 TratarImprevisto | **Cancel** + novo CNP | quem deteta → partes afetadas | cancel \| failure → o gestor reabre `resgate` ou `oferta` (regra OL2) |
 
-> **Na Fatia 1 do código** ([`../v1/src/`](../v1/src/)) já estão implementados P2, P3
-> e P5 (com `inform` na entrega) e o `cancel` do P2. Ver `v1/src/README.md`.
+> **No código** ([`../v1/src/`](../v1/src/)), Fatias 1 a 3: estão implementados P2, P3
+> e P5 (com `inform` na entrega) e o `cancel` do P2, tanto com o restaurante
+> como com o armazém a fazer de doador. P6 é interno ao armazém. Ver `v1/src/README.md`.
 
-**Porque P6 pode ser um Contract Net.** O armazém publica a tarefa, os
-operadores livres "licitam" com a sua aptidão (função, urgência), e o armazém
-escolhe. É o mesmo mecanismo dos outros protocolos, por isso poupa código. A
-alternativa mais simples é o operador *puxar* a tarefa de um quadro (sem
-mensagens por tarefa), mas então P6 deixa de ser uma interação FIPA e passa a
-ser um recurso partilhado (`Tarefa[t]`).
+**P6 ficou interno (decisão D7).** Como os operadores não são agentes, a
+distribuição de tarefas não troca mensagens FIPA: o armazém tem os seus
+operadores (cada um com as funções que sabe fazer) e uma tarefa espera até
+haver um livre que a saiba fazer. Se houver tempo, os operadores podem passar
+a agentes e P6 volta a ser um Contract Net `tarefa`.
 
 ---
 
@@ -247,7 +247,7 @@ sequenceDiagram
     autonumber
     participant D as Doador
     participant A as Armazém
-    participant O as Operadores
+    participant O as Operadores (internos)
     participant V as Resgatador
     participant R as Receptores
 
@@ -260,18 +260,18 @@ sequenceDiagram
     end
     D->>V: cfp [resgate] ... accept-proposal
     V->>A: inform(lote, kg, temperatura) [entrega]
-    Note over A: InspecionarLote, cria Tarefa "receber e armazenar"
-    A->>O: cfp(tarefa) [tarefa]
-    O-->>A: propose (o livre, com a função certa, dentro do turno)
-    A->>O: accept-proposal
-    O-->>A: inform(concluída)
+    Note over A: InspecionarLote
     A-->>V: inform(confirmada)
     V-->>D: inform(resultado)
+    Note over A,O: interno (D7): o lote espera na doca por um operador<br/>livre que saiba "receber"; frio > 60 min na doca = descartado
 
-    Note over A: mais tarde: GerirInventário, o armazém passa a ser Iniciador
-    A->>R: cfp(lote do estoque) [oferta]
+    Note over A,O: em cada ciclo: "controlar" descarta o que expirou
+    Note over A: GerirInventário: o armazém passa a ser Iniciador
+    A->>R: cfp(item do estoque) [oferta]
     R-->>A: propose / refuse
-    A->>R: accept-proposal ... (ContratarResgate com o armazém como gestor)
+    A->>R: accept-proposal
+    Note over A,O: interno: "preparar" o pedido
+    A->>V: cfp ... accept-proposal [resgate] (o armazém é o gestor)
 ```
 
 ### 3.5.3 Falhas: resgatador desiste e zona avariada
@@ -357,9 +357,11 @@ código em `v1/src/` (Fatia 1); onde ainda não há código, é a proposta.
 // resgate · inform  (Resgatador → quem ofereceu; fecha o Contract Net)
 { "resultado": "confirmada" }
 
-// tarefa · cfp  (Armazém → Operadores)   [Fatia 3]
-{ "tarefa": { "id": "T7", "tipo": "receber", "lote": "restaurante1-L2",
-              "duracao_min": 10, "prazo_min": 30 } }
+// No estoque, o item tem um id novo ("<lote>-A"), para as conversas do armazém
+// como doador não se misturarem com as do lote original.
+// oferta · cfp  (Armazém → Receptores)   [Fatia 3]
+{ "lote": { "id": "restaurante1-L3-A", "doador": "armazem1@localhost",
+            "origem": [6, 6], "categoria": "congelado", "kg": 10, "...": "..." } }
 ```
 
 ---
@@ -410,9 +412,9 @@ O `reply-by` é o parâmetro `prazo_s` de `esperar_respostas`.
 | I2 | AnunciarNecessidade | Mensagem `inform` periódica aos que conhece | Subscribe (o receptor subscreve doadores vizinhos) |
 | I3 | Uma ou várias rondas | Contract Net simples, relançado se falhar (regra OL2) | Iterated Contract Net |
 | I4 | Duração do `reply-by` | ~3 s reais por ronda (na Fatia 1, `PRAZO_RESPOSTAS_S`) | Adaptativa à urgência do lote |
-| I5 | Vizinhança (quem recebe o `cfp`) | Todos os conhecidos na Fatia 1; depois raio fixo em km | Os *k* mais próximos |
-| I6 | P6 DistribuirTarefas | Contract Net (reaproveita código) | Operador puxa de um quadro partilhado |
-| I7 | Do armazém ao receptor | Resgatador, via `resgate` com o armazém como gestor | O receptor retira por conta própria |
+| I5 | Vizinhança (quem recebe o `cfp`) | ✅ Restaurante: receptores a `RAIO_DOADOR_KM` (10 km) + armazéns; armazém: todos os receptores | Os *k* mais próximos |
+| I6 | P6 DistribuirTarefas | ✅ Interno ao armazém (D7), sem mensagens | Contract Net com operadores agentes (extra) |
+| I7 | Do armazém ao receptor | ✅ Resgatador, via `resgate` com o armazém como gestor | O receptor retira por conta própria |
 
 ## Referências
 

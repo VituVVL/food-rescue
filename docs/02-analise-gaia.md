@@ -161,7 +161,7 @@ deve ser **agentificado**.
 | Sensor de temperatura de cada zona | **Recurso** (parte de `Zona[z]`) | Só fornece dados |
 | Mapa, relógio, quadro de tarefas | **Recurso** | Só fornecem dados |
 | Armazém | **Agentificar** (um agente) | Decide aceitar ou recusar lotes por zona, quando voltar a oferecer estoque, reage a avarias (RF06, RF11, RF14). As zonas são recursos dele, não agentes |
-| Operador | **Agentificar** ⚠️ (D7) | Humano no circuito, escolhe tarefas conforme função e turno. *Fallback*: reduzir a um número de operadores e um tempo por tarefa |
+| Operador | **Não agentificar** ✅ (D7, decidido) | O papel OPERADOR existe, mas é desempenhado pelo agente Armazém: os operadores são um recurso interno (nome, funções que sabe fazer, livre/ocupado) e cada tarefa tem uma duração. Mantém o gargalo do S2 sem um protocolo a mais. Operadores como agentes fica como extra |
 | Inspetor de segurança alimentar | **Não agentificar** ⚠️ (D4) | Um inspetor dedicado seria um ponto central e um gargalo; a verificação passa a **papel** VERIFICADOR, desempenhado por quem recebe o lote |
 | Resgatador, doador, receptor | **Agentificar** | Humanos no circuito, com interesses próprios |
 
@@ -287,9 +287,11 @@ ARMAZENADOR = ( <ins>MonitorarTemperatura</ins> )<sup>ω</sup> ‖ ( AnunciarOfe
 ### PAPEL: OPERADOR *(WarehouseWorker)*: SO3
 
 **Descrição.** Voluntário que trabalha dentro do armazém. Tem **funções que
-sabe fazer** (receber e armazenar · controlar estoque · preparar pedido) e um
-turno. Escolhe tarefas do quadro: o livre pega a mais urgente que sabe fazer.
-Ninguém lhe atribui trabalho.
+sabe fazer** (receber e armazenar · controlar estoque · preparar pedido) e faz
+uma tarefa de cada vez. **Decisão D7:** este papel é desempenhado pelo próprio
+agente Armazém (em Gaia, um agente pode desempenhar vários papéis). Cada
+operador é um recurso interno do armazém, e uma tarefa espera até haver um
+operador livre que a saiba fazer. Turnos ficam como extra.
 
 **Protocolos e atividades.** DistribuirTarefas (como parceiro),
 TratarImprevisto · <ins>ReceberEArmazenar</ins>, <ins>ControlarEstoque</ins>,
@@ -581,6 +583,21 @@ São responsabilidades da **organização como um todo**, e não de um papel
 | OS7 | Nenhuma mensagem contém dados pessoais; `Necessidade[r]` é sempre agregada | Privacidade | RNF05 |
 | OS8 | ∀i na zona z: categoria(i) = tipo(z) | Cada zona só guarda a sua categoria | RF06 |
 
+### 2.5.1 Regras adotadas para a primeira versão completa
+
+Para ter o ecossistema completo primeiro, a simulação garante este subconjunto
+(decisão de 13/11/2026). As restantes regras ficam no modelo e entram se houver
+tempo.
+
+| Regra | Na simulação | Estado |
+|---|---|---|
+| OS2: um lote (ou parte dele) nunca tem dois destinos nem dois resgatadores | reserva na proposta, `accept` só a um, resgatador só leva um lote de cada vez | ✅ Fatias 1–3 |
+| OS6: ninguém aceita acima da capacidade (veículo, zona, necessidade do receptor; um operador, uma tarefa) | `livre_kg`, `recusa_porque`, operador livre/ocupado | ✅ Fatias 1–3 |
+| OS4 + OS5: frio partido ou validade expirada nunca é aceite | inspeção na entrega; descarte na doca (> 60 min) e no controlo de estoque | ✅ Fatias 2–3 |
+| OL1 + OL5: todo o lote acaba entregue, em estoque ou descartado, nunca esquecido | o estoque é reoferecido em ciclo e controlado | ✅ Fatia 3 |
+| OL2: uma falha de transporte leva a nova tentativa enquanto o lote for seguro | reabrir `ContratarResgate` | ⏳ Fatia 4 |
+| OL3: toda a entrega alimenta a reputação local | contador local de sucessos e falhas por par | ⏳ Fatia 4 |
+
 ---
 
 ## 2.6 O que fica para o design arquitetural (fase 2)
@@ -601,7 +618,8 @@ A análise deixou propositadamente em aberto:
    inform, failure…).
 4. **O mapeamento papel → tipo de agente** (modelo de agentes) e os serviços
    de cada agente (modelo de serviços). Proposta: `Restaurante`, `Resgatador`,
-   `Armazem`, `Operador`, `ONG`, `Abrigo`.
+   `Armazem`, `ONG`, `Abrigo`. O `Armazem` desempenha ARMAZENADOR e OPERADOR
+   (D7); `ONG` e `Abrigo` são o mesmo agente com parâmetros diferentes.
 5. **O modo de falha do armazém** (RNF01): como medir a robustez com o
    armazém indisponível.
 
@@ -610,12 +628,12 @@ Os pontos 1–3 já têm uma proposta em [03-interacoes-fipa.md](03-interacoes-f
 ## 2.7 Checklist de validação (para a reunião do grupo)
 
 - [ ] Concordamos com as 4 sub-organizações (ou passamos a 1)?
-- [ ] O armazém como **serviço** (e não coordenador) responde bem ao "sem despachante central"? Confirmar com o professor.
+- [x] O armazém como **serviço** (e não coordenador) responde bem ao "sem despachante central"? Confirmado com o professor.
 - [ ] Faltam recursos no ambiente? (ex.: janelas horárias dos receptores)
 - [ ] Cada RF da secção 1.4 aparece em pelo menos um papel, protocolo ou regra?
 - [ ] Os valores ⚠️ (60 min fora do frio, 5 °C, durações das tarefas) estão bem?
 - [ ] D4: a verificação fica como papel (proposta) ou agente inspetor?
-- [ ] D7: operadores como agentes, ou só um número e um tempo por tarefa?
+- [x] D7: operadores não são agentes; o papel é desempenhado pelo Armazém.
 - [ ] Cada membro consegue explicar 2 papéis e 3 regras na apresentação?
 
 ## Referências

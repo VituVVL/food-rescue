@@ -1,7 +1,7 @@
 """
 ONG: papel RECEPTOR.
 
-Responde às ofertas dos restaurantes e recebe as entregas. Um abrigo seria o
+Responde às ofertas dos restaurantes e do armazém e recebe as entregas. Um abrigo seria o
 mesmo código com outros parâmetros (categorias aceites e necessidade).
 
 Regra de segurança do guia: "não declara necessidade acima do que consegue
@@ -13,7 +13,7 @@ from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 
 from . import mensagens as M
-from .config import TEMP_MAX_REFRIGERADO_C
+from .config import TEMP_MAX_CONGELADO_C, TEMP_MAX_REFRIGERADO_C
 from .registo import registar
 
 
@@ -88,5 +88,7 @@ class OngAgent(Agent):
             if lote["kg"] > kg_reservado + 1e-9:
                 return "kg acima do reservado"
             if lote["categoria"] == "refrigerado" and temperatura_c > TEMP_MAX_REFRIGERADO_C:
+                return "quebra da cadeia de frio"
+            if lote["categoria"] == "congelado" and temperatura_c > TEMP_MAX_CONGELADO_C:
                 return "quebra da cadeia de frio"
             return None

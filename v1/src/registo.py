@@ -18,6 +18,12 @@ EVENTOS: list[dict] = []
 _inicio = time.monotonic()
 
 
+def agora_min() -> float:
+    """Relógio simulado: minutos desde o início da corrida (ver ESCALA_S)."""
+    from .config import ESCALA_S
+    return (time.monotonic() - _inicio) / ESCALA_S
+
+
 def registar(agente: str, evento: str, lote: str = "", **dados) -> None:
     t = time.monotonic() - _inicio
     EVENTOS.append({"t_s": round(t, 2), "agente": agente, "evento": evento,
@@ -27,35 +33,34 @@ def registar(agente: str, evento: str, lote: str = "", **dados) -> None:
 
 
 
-def resumo(lotes_gerados: list[dict]) -> dict:
-    """Distingue entregas a ONGs de lotes guardados em armazém."""
-
-    entregas = [
-        e for e in EVENTOS
-        if e["evento"] == "lote_entregue"
-        and e.get("resultado") == "confirmada"
-    ]
-
+def resumo(lotes_gerados: list[dict], kg_em_estoque: float = 0.0) -> dict:
+    """
+    Métricas no fim da corrida. A comida pode chegar a um receptor por dois
+    caminhos: direto do restaurante, ou passando pelo armazém. Os kg que entram
+    no armazém só contam como resgatados quando saem para um receptor.
+    """
+    entregas = [e for e in EVENTOS
+                if e["evento"] == "lote_entregue" and e.get("resultado") == "confirmada"]
     kg_gerados = sum(l["kg"] for l in lotes_gerados)
-    kg_ongs = sum(
-        e["kg"] for e in entregas if e.get("tipo_destino") == "ong"
-    )
-    kg_armazens = sum(
-        e["kg"] for e in entregas if e.get("tipo_destino") == "armazem"
-    )
-    kg_entregues = kg_ongs + kg_armazens
+    kg_direto = sum(e["kg"] for e in entregas
+                    if e["tipo_destino"] == "ong" and not e["lote"].endswith("-A"))
+    kg_via_armazem = sum(e["kg"] for e in entregas if e["lote"].endswith("-A"))
+    kg_para_armazem = sum(e["kg"] for e in entregas if e["tipo_destino"] == "armazem")
+    kg_descartados = sum(e["kg"] for e in EVENTOS if e["evento"] == "lote_descartado")
+    kg_receptores = kg_direto + kg_via_armazem
+
+    def taxa(x):
+        return round(x / kg_gerados, 2) if kg_gerados else 0
 
     return {
         "lotes_gerados": len(lotes_gerados),
-        "lotes_entregues": len({e["lote"] for e in entregas}),
-        "entregas_confirmadas": len(entregas),
         "kg_gerados": kg_gerados,
-        "kg_entregues": kg_entregues,
-        "kg_ongs": kg_ongs,
-        "kg_armazens": kg_armazens,
-        "kg_sem_entrega": round(kg_gerados - kg_entregues, 2),
-        "taxa_de_resgate": round(kg_entregues / kg_gerados, 2)
-                           if kg_gerados else 0,
-        "taxa_entrega_direta_ongs": round(kg_ongs / kg_gerados, 2)
-                                   if kg_gerados else 0,
+        "kg_direto_receptores": kg_direto,
+        "kg_entraram_armazem": kg_para_armazem,
+        "kg_armazem_para_receptores": kg_via_armazem,
+        "kg_em_estoque_no_fim": round(kg_em_estoque, 2),
+        "kg_descartados": kg_descartados,
+        "kg_perdidos": round(kg_gerados - kg_direto - kg_para_armazem, 2),
+        "taxa_de_resgate": taxa(kg_receptores),        # chegou a quem precisa
+        "taxa_entrega_direta": taxa(kg_direto),
     }
