@@ -26,6 +26,7 @@ def distancia(a: tuple[int, int], b: tuple[int, int]) -> int:
 
 # ---- Segurança alimentar ---------------------------------------------------
 TEMP_MAX_REFRIGERADO_C = 5      # acima disto, a ONG recusa um lote refrigerado
+TEMP_MAX_CONGELADO_C = -18      # acima disto, o armazém recusa um lote congelado
 LIMITE_FORA_DO_FRIO_MIN = 60    # "limite L" do guia (usado a partir da Fatia 2)
 
 # ---- Cenário da Fatia 1 ----------------------------------------------------

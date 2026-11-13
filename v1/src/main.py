@@ -63,7 +63,7 @@ async def main():
     # Cada restaurante só conhece os pares que lhe passamos aqui (sem diretório
     # central). Na Fatia 1 conhecem todos; depois pode limitar-se por raio.
     ongs_conhecidas = [(str(o.jid), o.pos) for o in ongs]
-    resgatadores_conhecidos = [str(r.jid) for r in resgatadores]#
+    resgatadores_conhecidos = [str(r.jid) for r in resgatadores]
     # Armazéns conhecidos pelos restaurantes (identificador e localização).
     armazens_conhecidos = [(str(a.jid), a.pos) for a in armazens]
     

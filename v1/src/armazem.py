@@ -8,8 +8,12 @@ Tem três zonas de armazenamento: seco, refrigerado e congelado.
 Cada zona tem uma capacidade máxima. O armazém controla os kg já
 armazenados e os kg reservados para entregas ainda não realizadas.
 
-Nesta fase, definimos apenas os atributos do agente.
-Os comportamentos de negociação e receção serão adicionados depois.
+Comportamento (Inbox):
+  - oferta/cfp             -> propõe os kg que cabem na zona e reserva-os
+  - oferta/accept-proposal -> mantém a reserva até à entrega
+  - oferta/reject|cancel   -> liberta a reserva
+  - entrega/inform         -> inspeciona (reserva, categoria, kg, cadeia de
+                              frio) e confirma ou recusa a entrega
 """
 
 from spade.agent import Agent
@@ -17,7 +21,7 @@ from spade.behaviour import CyclicBehaviour
 
 from . import mensagens as M
 from .registo import registar
-from .config import TEMP_MAX_REFRIGERADO_C
+from .config import TEMP_MAX_REFRIGERADO_C, TEMP_MAX_CONGELADO_C
 
 
 class ArmazemAgent(Agent):
@@ -48,16 +52,16 @@ class ArmazemAgent(Agent):
         self.inventario = {}
 
     def livre_kg(self, categoria: str) -> float:
-            """Devolve a capacidade disponível na zona da categoria indicada."""
-    
-            # Se não existir uma zona para esta categoria, não podemos guardar o lote.
-            if categoria not in self.capacidades_kg:
-                return 0.0
-    
-            # Capacidade disponível = capacidade máxima - armazenado - reservado.
-            return (self.capacidades_kg[categoria]
-                    - self.armazenado_kg[categoria]
-                    - self.reservado_kg[categoria])
+        """Devolve a capacidade disponível na zona da categoria indicada."""
+
+        # Se não existir uma zona para esta categoria, não podemos guardar o lote.
+        if categoria not in self.capacidades_kg:
+            return 0.0
+
+        # Capacidade disponível = capacidade máxima - armazenado - reservado.
+        return (self.capacidades_kg[categoria]
+                - self.armazenado_kg[categoria]
+                - self.reservado_kg[categoria])
 
     
     async def setup(self):
@@ -150,7 +154,7 @@ class ArmazemAgent(Agent):
                           and c["temperatura_c"] > TEMP_MAX_REFRIGERADO_C):
                         motivo = "quebra da cadeia de frio"
                     elif (categoria == "congelado"
-                            and c["temperatura_c"] > -18):
+                          and c["temperatura_c"] > TEMP_MAX_CONGELADO_C):
                         motivo = "quebra da cadeia de frio"
                     else:
                         motivo = None
